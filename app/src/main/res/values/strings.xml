@@ -1,0 +1,36 @@
+<resources>
+    <string name="app_name">DIY GPS Tracker</string>
+    <string name="asset_name_hint">Asset name</string>
+    <string name="add_button_title">Add</string>
+    <string name="firestore_configuration">Firestore Configuration</string>
+    <string name="firestore_configuration_help">Specify your Firestore project\'s settings. You will store your own data. Click on the title for help.</string>
+    <string name="project_id_title">Project ID</string>
+    <string name="project_id_help">Project ID of your Firebase / Firestore project</string>
+    <string name="application_id_title">Application ID</string>
+    <string name="application_id_help">Application ID of your Firebase / Firestore project</string>
+    <string name="api_key_title">API Key</string>
+    <string name="api_key_help">API Key of your Firebase / Firestore project</string>
+    <string name="google_auth_title">Authentication Type</string>
+    <string name="google_auth_help">On: Google, Off: Anonymous</string>
+    <string name="settings_help_key">settings_help</string>
+    <string name="settings_help">Create your own Firestore project to store your own data. For detailed explanation see <a href="https://diygpstracker.github.io/" target="_blank">DIY GPS Tracker</a></string>
+    <string name="settings_button_title">Settings</string>
+    <string name="privacy_button_title">Privacy Policy</string>
+    <string name="help_button_title">Help</string>
+    <string name="connect_key">connect_button</string>
+    <string name="connect">&#xbb;Connect&#xab;</string>
+    <string name="connect_help">Click connect to continue</string>
+    <string name="look_back_minutes">GPS data look back (mins)</string>
+    <string name="look_back_minutes_help">How long the Map looks back in time</string>
+    <string name="home_page_url">https://diygpstracker.github.io/</string>
+    <string name="privacy_policy_url">https://diygpstracker.github.io/privacypolicy</string>
+    <string name="authentication_failed">Authentication failed.</string>
+    <string name="uncofigured_firestore">Firestore not configured. Please specify Project ID, Application ID, and API Key then connect.</string>
+    <string name="asset_button_title">Asset List</string>
+    <string name="normal_map">Normal Map</string>
+    <string name="hybrid_map">Hybrid Map</string>
+    <string name="satellite_map">Satellite Map</string>
+    <string name="terrain_map">Terrain Map</string>
+    <string name="lat_long_snippet">Lat: %1$.5f, Long: %2$.5f</string>
+    <string name="dropped_pin">Map Pin</string>
+</resources>

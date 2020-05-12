@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="look_back_minutes_display">
+        <item>Minute</item>
+        <item>10 Minutes</item>
+        <item>Hour</item>
+        <item>Day</item>
+        <item>Week</item>
+        <item>Month</item>
+        <item>Year</item>
+    </string-array>
+    <string-array name="look_back_minutes_value">
+        <item>1</item>
+        <item>10</item>
+        <item>60</item>
+        <item>1440</item>
+        <item>10080</item>
+        <item>43200</item>
+        <item>525600</item>
+    </string-array>
+</resources>

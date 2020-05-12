@@ -1,0 +1,56 @@
+<PreferenceScreen
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".ui.SettingsFragment">
+
+    <Preference
+        android:key="settings_help"
+        android:persistent="false"
+        android:title="@string/firestore_configuration"
+        android:summary="@string/firestore_configuration_help"
+        android:icon="@drawable/ic_help"/>
+
+    <EditTextPreference
+        app:key="project_id"
+        app:title="@string/project_id_title"
+        app:summary="@string/project_id_help"
+        android:icon="@drawable/ic_one"/>
+
+    <EditTextPreference
+        app:key="application_id"
+        app:title="@string/application_id_title"
+        app:summary="@string/application_id_help"
+        android:icon="@drawable/ic_two"/>
+
+    <EditTextPreference
+        app:key="api_key"
+        app:title="@string/api_key_title"
+        app:summary="@string/api_key_help"
+        android:icon="@drawable/ic_three"/>
+
+    <CheckBoxPreference
+        app:key="auth_type"
+        app:title="@string/google_auth_title"
+        app:summary="@string/google_auth_help"
+        android:icon="@drawable/ic_identity"/>
+
+    <DropDownPreference
+        android:key="look_back_minutes"
+        android:title="@string/look_back_minutes"
+        android:summary="@string/look_back_minutes_help"
+        android:entries="@array/look_back_minutes_display"
+        android:entryValues="@array/look_back_minutes_value"
+        android:defaultValue="10"
+        android:icon="@drawable/ic_history"/>
+
+    <Preference
+        android:key="connect_button"
+        android:persistent="false"
+        android:title="@string/connect"
+        android:summary="@string/connect_help"
+        android:icon="@drawable/ic_menu_open"/>
+
+</PreferenceScreen>
