@@ -6,7 +6,6 @@ import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.Query
 import dev.csaba.diygpstracker.data.remote.getLockUpdate
 import dev.csaba.diygpstracker.data.remote.mapToAsset
-import dev.csaba.diygpstracker.data.remote.mapToAssetData
 import dev.csaba.diygpstracker.data.remote.mapToLockRadiusUpdate
 import dev.csaba.diygpstracker.data.remote.mapToPeriodIntervalUpdate
 import dev.csaba.diygpstracker.data.remote.RemoteAsset
@@ -23,7 +22,6 @@ class FirestoreAssetRepository(secondaryDB: FirebaseFirestore) : IAssetRepositor
     companion object {
         private const val TAG = "FirestoreAssetRepo"
         private const val ASSET_COLLECTION = "Assets"
-        private const val REPORT_COLLECTION = "Reports"
     }
 
     private var remoteDB: FirebaseFirestore = secondaryDB
@@ -73,64 +71,6 @@ class FirestoreAssetRepository(secondaryDB: FirebaseFirestore) : IAssetRepositor
     }
 
     private fun mapDocumentToRemoteAsset(document: DocumentSnapshot) = document.toObject(RemoteAsset::class.java)!!.apply { id = document.id }
-
-    override fun addAsset(asset: Asset): Completable {
-        return Completable.create { emitter ->
-            remoteDB.collection(ASSET_COLLECTION)
-                .add(mapToAssetData(asset))
-                .addOnSuccessListener {
-                    it.collection(REPORT_COLLECTION)
-                    if (!emitter.isDisposed) {
-                        emitter.onComplete()
-                    }
-                }
-                .addOnFailureListener {
-                    if (!emitter.isDisposed) {
-                        emitter.onError(it)
-                    }
-                }
-        }
-    }
-
-    override fun deleteAsset(assetId: String): Completable {
-        // TODO: delete report collection, sub collections are not deleted automatically
-        // https://stackoverflow.com/questions/49125183/how-to-model-this-structure-to-handle-delete/
-        return Completable.create { emitter ->
-            remoteDB.collection(ASSET_COLLECTION)
-                .document(assetId)
-                .delete()
-                .addOnSuccessListener {
-                    if (!emitter.isDisposed) {
-                        emitter.onComplete()
-                    }
-                }
-                .addOnFailureListener {
-                    if (!emitter.isDisposed) {
-                        emitter.onError(it)
-                    }
-                }
-        }
-    }
-
-    override fun flipAssetLockState(assetId: String, lockState: Boolean): Completable {
-        return Completable.create { emitter ->
-            remoteDB.collection(ASSET_COLLECTION)
-                .document(assetId)
-                .update(getLockUpdate(!lockState))
-                .addOnSuccessListener {
-                    Log.d(TAG, "Unlocked!")
-                    if (!emitter.isDisposed) {
-                        emitter.onComplete()
-                    }
-                }
-                .addOnFailureListener {
-                    Log.d(TAG, "Unlocking fail")
-                    if (!emitter.isDisposed) {
-                        emitter.onError(it)
-                    }
-                }
-        }
-    }
 
     override fun setAssetLockRadius(assetId: String, lockRadius: Int): Completable {
         return Completable.create { emitter ->

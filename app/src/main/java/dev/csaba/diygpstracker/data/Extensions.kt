@@ -25,8 +25,7 @@ fun FragmentActivity.getSecondaryFirebaseConfiguration(): FirebaseProjectConfigu
         getPreferenceString(preferences, "project_id"),
         getPreferenceString(preferences, "application_id"),
         getPreferenceString(preferences, "api_key"),
-        preferences.getBoolean("auth_type", false),
-        preferences.getString("look_back_minutes", "10")!!.toInt()
+        preferences.getBoolean("auth_type", false)
     )
 }
 
@@ -35,4 +34,14 @@ fun FragmentActivity.hasAuthConfiguration(): Boolean {
     return configuration.projectId.isNotBlank() &&
             configuration.applicationId.isNotBlank() &&
             configuration.apiKey.isNotBlank()
+}
+
+fun FragmentActivity.getAssetId(): String {
+    val preferences = PreferenceManager.getDefaultSharedPreferences(applicationContext)
+    return getPreferenceString(preferences, "asset_id")
+}
+
+fun FragmentActivity.setAssetId(assetId: String) {
+    val preferences = PreferenceManager.getDefaultSharedPreferences(applicationContext)
+    preferences.edit().putString("asset_id", assetId).apply()
 }

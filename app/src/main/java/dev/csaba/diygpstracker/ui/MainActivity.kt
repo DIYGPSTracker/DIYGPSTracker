@@ -21,7 +21,9 @@ import com.google.firebase.ktx.app
 import com.google.firebase.ktx.initialize
 import dev.csaba.diygpstracker.ApplicationSingleton
 import dev.csaba.diygpstracker.R
+import dev.csaba.diygpstracker.data.getAssetId
 import dev.csaba.diygpstracker.data.getSecondaryFirebaseConfiguration
+import dev.csaba.diygpstracker.data.setAssetId
 import dev.csaba.diygpstracker.ui.adapter.AssetAdapter
 import dev.csaba.diygpstracker.ui.adapter.OnAssetInputListener
 import dev.csaba.diygpstracker.viewmodel.MainViewModel
@@ -39,17 +41,21 @@ class MainActivity : AppCompatActivityWithActionBar(), OnAssetInputListener {
     private lateinit var viewModel: MainViewModel
     private val assetAdapter = AssetAdapter(this)
     private lateinit var auth: FirebaseAuth
-    private var lookBackMinutes: Int = 10
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+
+        val assetId = getAssetId()
+        if (assetId.isNotEmpty()) {
+            onTrackClick(assetId)
+        }
+
         recycler.layoutManager = LinearLayoutManager(this, RecyclerView.VERTICAL, false)
         recycler.adapter = assetAdapter
 
         val appSingleton = application as ApplicationSingleton
         val projectConfiguration = this.getSecondaryFirebaseConfiguration()
-        lookBackMinutes = projectConfiguration.lookBackMinutes
         // Get or initialize secondary FirebaseApp.
         if (appSingleton.firebaseApp == null) {
             val options = FirebaseOptions.Builder()
@@ -165,24 +171,8 @@ class MainActivity : AppCompatActivityWithActionBar(), OnAssetInputListener {
 
     override fun onTrackClick(assetId: String) {
         val intent = Intent(this, TrackerActivity::class.java)
+        setAssetId(assetId)
         intent.putExtra("assetId", assetId)
-        intent.putExtra("lookBackMinutes", lookBackMinutes)
         startActivity(intent)
-    }
-
-    override fun onFlipAssetLockClick(assetId: String, lockState: Boolean) {
-        viewModel.flipAssetLockState(assetId, lockState)
-    }
-
-    override fun onDeleteClick(assetId: String) {
-        viewModel.deleteAsset(assetId)
-    }
-
-    override fun onLockRadiusChange(assetId: String, lockRadius: Int) {
-        viewModel.setAssetLockRadius(assetId, lockRadius)
-    }
-
-    override fun onPeriodIntervalChange(assetId: String, periodIntervalProgress: Int) {
-        viewModel.setAssetPeriodInterval(assetId, periodIntervalProgress)
     }
 }

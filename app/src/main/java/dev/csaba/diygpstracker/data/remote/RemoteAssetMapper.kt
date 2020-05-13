@@ -39,19 +39,6 @@ fun mapToRemoteAsset(asset: Asset): RemoteAsset {
     )
 }
 
-fun mapToAssetData(asset: Asset): HashMap<String, Any> {
-    return hashMapOf(
-        "title" to asset.title,
-        "lock" to asset.lock,
-        "lockLat" to asset.lockLat,
-        "lockLon" to asset.lockLon,
-        "lockRadius" to asset.lockRadius,
-        "periodInterval" to asset.periodInterval,
-        "created" to FieldValue.serverTimestamp(),
-        "updated" to FieldValue.serverTimestamp()
-    )
-}
-
 fun mapToLockRadiusUpdate(lockRadius: Int): HashMap<String, Any> {
     return hashMapOf(
         "lockRadius" to lockRadius,

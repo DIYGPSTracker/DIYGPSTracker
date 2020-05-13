@@ -1,6 +1,5 @@
 package dev.csaba.diygpstracker.data
 
-import android.util.Log
 import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.Query
@@ -9,14 +8,11 @@ import dev.csaba.diygpstracker.data.remote.mapToReport
 import dev.csaba.diygpstracker.data.remote.mapToReportData
 import io.reactivex.Completable
 import io.reactivex.Observable
-import io.reactivex.ObservableEmitter
 import io.reactivex.Single
 import io.reactivex.schedulers.Schedulers
-import io.reactivex.subjects.BehaviorSubject
-import java.time.LocalDateTime
 
 
-class FirestoreReportRepository(secondaryDB: FirebaseFirestore, assetId: String, lookBackMinutes: Int) : IReportRepository {
+class FirestoreReportRepository(secondaryDB: FirebaseFirestore, assetId: String) : IReportRepository {
 
     companion object {
         private const val TAG = "FirestoreReportRepo"
@@ -25,33 +21,7 @@ class FirestoreReportRepository(secondaryDB: FirebaseFirestore, assetId: String,
     }
 
     private val remoteDB: FirebaseFirestore = secondaryDB
-    private var changeObservable: Observable<List<DocumentSnapshot>>
     private val _assetId: String = assetId
-    private var _lookBackMinutes: Int = lookBackMinutes
-
-    init {
-        changeObservable = BehaviorSubject.create { emitter: ObservableEmitter<List<DocumentSnapshot>> ->
-            val listeningRegistration = remoteDB.collection(ASSET_COLLECTION)
-                .document(_assetId).collection(REPORT_COLLECTION)
-                .whereGreaterThan("created",
-                    LocalDateTime.now().minusMinutes(_lookBackMinutes.toLong()))
-                .addSnapshotListener { value, error ->
-                    if (value == null || error != null) {
-                        return@addSnapshotListener
-                    }
-
-                    if (!emitter.isDisposed) {
-                        emitter.onNext(value.documents)
-                    }
-
-                    value.documentChanges.forEach {
-                        Log.d(TAG, "Data changed type ${it.type} document ${it.document.id}")
-                    }
-                }
-
-            emitter.setCancellable { listeningRegistration.remove() }
-        }
-    }
 
     private fun mapDocumentToRemoteReport(document: DocumentSnapshot) = document.toObject(RemoteReport::class.java)!!.apply { id = document.id }
 
@@ -97,10 +67,4 @@ class FirestoreReportRepository(secondaryDB: FirebaseFirestore, assetId: String,
                 }
         }
     }
-
-    override fun getChangeObservable(): Observable<List<Report>> =
-        changeObservable.hide()
-            .observeOn(Schedulers.io())
-            .map { list -> list.map(::mapDocumentToRemoteReport).map(::mapToReport) }
-
 }
