@@ -23,32 +23,6 @@ class FirestoreReportRepository(secondaryDB: FirebaseFirestore, assetId: String)
     private val remoteDB: FirebaseFirestore = secondaryDB
     private val _assetId: String = assetId
 
-    private fun mapDocumentToRemoteReport(document: DocumentSnapshot) = document.toObject(RemoteReport::class.java)!!.apply { id = document.id }
-
-    override fun getAllReports(): Single<List<Report>> {
-        return Single.create<List<DocumentSnapshot>> { emitter ->
-            remoteDB.collection(ASSET_COLLECTION)
-                .document(_assetId).collection(REPORT_COLLECTION)
-                .orderBy("created", Query.Direction.ASCENDING)
-                .get()
-                .addOnSuccessListener {
-                    if (!emitter.isDisposed) {
-                        emitter.onSuccess(it.documents)
-                    }
-                }
-                .addOnFailureListener {
-                    if (!emitter.isDisposed) {
-                        emitter.onError(it)
-                    }
-                }
-        }
-            .observeOn(Schedulers.io())
-            .flatMapObservable { Observable.fromIterable(it) }
-            .map(::mapDocumentToRemoteReport)
-            .map(::mapToReport)
-            .toList()
-    }
-
     override fun addReport(report: Report): Completable {
         return Completable.create { emitter ->
             remoteDB.collection(ASSET_COLLECTION)

@@ -1,31 +1,22 @@
 package dev.csaba.diygpstracker.ui
 
-import android.Manifest
-import android.annotation.SuppressLint
-import android.content.Intent
-import android.content.pm.PackageManager
-import android.graphics.Color
-import android.location.LocationManager
-import android.net.Uri
+import android.app.job.JobInfo
+import android.app.job.JobScheduler
+import android.content.ComponentName
+import android.content.Context
 import android.os.Bundle
 import android.view.Menu
-import android.view.MenuItem
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.app.ActivityCompat
-import androidx.core.content.ContextCompat
-import androidx.core.os.ConfigurationCompat
-import androidx.lifecycle.Observer
-import dev.csaba.diygpstracker.ApplicationSingleton
 import dev.csaba.diygpstracker.R
-import dev.csaba.diygpstracker.data.Report
+import dev.csaba.diygpstracker.TrackerJobService
 import dev.csaba.diygpstracker.viewmodel.TrackerViewModel
-import java.text.SimpleDateFormat
 
 
 class TrackerActivity : AppCompatActivity() {
 
     companion object {
         private const val REQUEST_LOCATION_PERMISSION = 1
+        private const val LOCATION_TRACKER_JOB_ID = 9002
     }
 
     private lateinit var viewModel: TrackerViewModel
@@ -35,6 +26,20 @@ class TrackerActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         isRestore = savedInstanceState != null
         setContentView(R.layout.activity_tracker)
+
+        val jobScheduler =
+            getSystemService(Context.JOB_SCHEDULER_SERVICE) as JobScheduler
+        jobScheduler.schedule(
+            JobInfo.Builder(
+                LOCATION_TRACKER_JOB_ID,
+                ComponentName(this, TrackerJobService::class.java)
+            )
+                .setPeriodic(10000)
+                .setBackoffCriteria(5000, JobInfo.BACKOFF_POLICY_LINEAR)
+                .setPersisted(true)
+                .setRequiredNetworkType(JobInfo.NETWORK_TYPE_ANY)
+                .build()
+        )
     }
 
     // Initializes contents of Activity's standard options menu. Only called the first time options

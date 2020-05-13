@@ -15,27 +15,9 @@ import dev.csaba.diygpstracker.data.Report
 
 class TrackerViewModel(firestore: FirebaseFirestore, assetId: String) : ViewModel() {
 
-    private val _reportList = MutableLiveData<List<Report>>()
-    val reportList: LiveData<List<Report>>
-        get() = _reportList
-
     private var repository: IReportRepository = FirestoreReportRepository(firestore, assetId)
 
     private val disposable = CompositeDisposable()
-
-    init {
-        repository.getChangeObservable()
-            .observeOn(AndroidSchedulers.mainThread())
-            .subscribe (
-                {
-                    _reportList.value = it
-                },
-                {
-                    it.printStackTrace()
-                }
-            )
-            .addTo(disposable)
-    }
 
     fun addReport(lat: Double, lon: Double, battery: Double) {
         repository.addReport(
