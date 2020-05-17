@@ -1,7 +1,7 @@
 package dev.csaba.diygpstracker.data.remote
 
-import com.google.firebase.firestore.FieldValue
 import dev.csaba.diygpstracker.data.Report
+import java.util.Date
 import kotlin.collections.HashMap
 
 
@@ -30,7 +30,7 @@ fun mapToReportData(report: Report): HashMap<String, Any> {
         "lat" to report.lat,
         "lon" to report.lon,
         "battery" to report.battery,
-        "created" to FieldValue.serverTimestamp()
+        "created" to mapDateToTimestamp(report.created)
     )
 }
 
@@ -38,6 +38,6 @@ fun mapToLockLocation(report: Report): HashMap<String, Any> {
     return hashMapOf(
         "lockLat" to report.lat,
         "lockLon" to report.lon,
-        "updated" to FieldValue.serverTimestamp()
+        "updated" to mapDateToTimestamp(Date())
     )
 }
