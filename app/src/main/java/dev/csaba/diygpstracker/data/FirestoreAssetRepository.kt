@@ -20,7 +20,7 @@ import io.reactivex.subjects.BehaviorSubject
 class FirestoreAssetRepository(secondaryDB: FirebaseFirestore) : IAssetRepository {
 
     companion object {
-        private const val TAG = "FirestoreAssetRepo"
+        private val TAG = FirestoreAssetRepository::class.java.simpleName
         private const val ASSET_COLLECTION = "Assets"
     }
 

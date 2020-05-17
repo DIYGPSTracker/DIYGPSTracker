@@ -15,7 +15,7 @@ import io.reactivex.schedulers.Schedulers
 class FirestoreReportRepository(secondaryDB: FirebaseFirestore, assetId: String) : IReportRepository {
 
     companion object {
-        private const val TAG = "FirestoreReportRepo"
+        private val TAG = FirestoreReportRepository::class.java.simpleName
         private const val ASSET_COLLECTION = "Assets"
         private const val REPORT_COLLECTION = "Reports"
     }

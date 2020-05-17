@@ -33,7 +33,7 @@ import kotlinx.android.synthetic.main.activity_main.*
 class MainActivity : AppCompatActivityWithActionBar(), OnAssetInputListener {
 
     companion object {
-        private const val TAG = "MainActivity"
+        private val TAG = MainActivity::class.java.simpleName
         private const val SECONDARY_NAME = "secondary"
         private const val RC_SIGN_IN = 9001
     }

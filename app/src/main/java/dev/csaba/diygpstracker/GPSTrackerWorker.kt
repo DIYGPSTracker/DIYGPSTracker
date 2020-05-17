@@ -1,20 +1,35 @@
 package dev.csaba.diygpstracker
 
 import android.content.Context
-import androidx.work.ListenableWorker
-import androidx.work.ListenableWorker.Result
+import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
-import com.google.common.util.concurrent.ListenableFuture
 
-class GPSTrackerWorker(appContext: Context, params: WorkerParameters) :
-    ListenableWorker(appContext, params) {
 
-    override fun startWork(): ListenableFuture<ListenableWorker.Result> {
-        // Do your work here.
-        TODO("Return a ListenableFuture<Result>")
+class GPSTrackerWorker(context: Context, params: WorkerParameters) :
+    CoroutineWorker(context, params) {
+
+    companion object {
+        private val TAG = GPSTrackerWorker::class.java.simpleName
     }
 
-    override fun onStopped() {
-        // Cleanup because you are being stopped.
+//    val data = workDataOf(
+//        KEY_MY_INT to myIntVar,
+//        KEY_MY_INT_ARRAY to myIntArray,
+//        KEY_MY_STRING to myString
+//    )
+
+    override suspend fun doWork(): Result {
+        val serverUrl = inputData.getString("SERVER_URL")
+
+        return try {
+            // Do something with the URL
+            Result.success()
+        } catch (error: Throwable) {
+            if (runAttemptCount <3) {
+                Result.retry()
+            } else {
+                Result.failure()
+            }
+        }
     }
 }
