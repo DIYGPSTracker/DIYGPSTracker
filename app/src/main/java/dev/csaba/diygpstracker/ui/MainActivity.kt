@@ -2,7 +2,6 @@ package dev.csaba.diygpstracker.ui
 
 import android.content.Intent
 import android.os.Bundle
-import android.util.Log
 import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -28,12 +27,12 @@ import dev.csaba.diygpstracker.ui.adapter.AssetAdapter
 import dev.csaba.diygpstracker.ui.adapter.OnAssetInputListener
 import dev.csaba.diygpstracker.viewmodel.MainViewModel
 import kotlinx.android.synthetic.main.activity_main.*
+import timber.log.Timber
 
 
 class MainActivity : AppCompatActivityWithActionBar(), OnAssetInputListener {
 
     companion object {
-        private val TAG = MainActivity::class.java.simpleName
         private const val SECONDARY_NAME = "secondary"
         private const val RC_SIGN_IN = 9001
     }
@@ -100,10 +99,10 @@ class MainActivity : AppCompatActivityWithActionBar(), OnAssetInputListener {
                 auth.signInWithEmailAndPassword(projectConfiguration.email, projectConfiguration.code)
                     .addOnCompleteListener(this) { task ->
                         if (task.isSuccessful) {
-                            Log.d(TAG, "signInWithEmailAndPassword:success")
+                            Timber.d("signInWithEmailAndPassword:success")
                             populateViewModel(appSingleton.firestore!!)
                         } else {
-                            Log.w(TAG, "signInWithEmailAndPassword:failure", task.exception)
+                            Timber.e(task.exception, "signInWithEmailAndPassword:failure")
                             Snackbar.make(
                                 window.decorView.rootView,
                                 applicationContext.getString(R.string.authentication_failed),
@@ -115,10 +114,10 @@ class MainActivity : AppCompatActivityWithActionBar(), OnAssetInputListener {
                 auth.signInAnonymously()
                     .addOnCompleteListener(this) { task ->
                         if (task.isSuccessful) {
-                            Log.d(TAG, "signInAnonymously:success")
+                            Timber.d("signInAnonymously:success")
                             populateViewModel(appSingleton.firestore!!)
                         } else {
-                            Log.w(TAG, "signInAnonymously:failure", task.exception)
+                            Timber.e(task.exception, "signInAnonymously:failure")
                             Snackbar.make(
                                 window.decorView.rootView,
                                 applicationContext.getString(R.string.authentication_failed),
@@ -143,25 +142,25 @@ class MainActivity : AppCompatActivityWithActionBar(), OnAssetInputListener {
                 firebaseAuthWithGoogle(account!!)
             } catch (e: ApiException) {
                 // Google Sign In failed, update UI appropriately
-                Log.w(TAG, "Google sign in failed", e)
+                Timber.e(e, "Google sign in failed")
             }
         }
     }
 
     private fun firebaseAuthWithGoogle(account: GoogleSignInAccount) {
-        Log.d(TAG, "firebaseAuthWithGoogle:" + account.id!!)
+        Timber.d("firebaseAuthWithGoogle: ${account.id!!}")
 
         val credential = GoogleAuthProvider.getCredential(account.idToken, null)
         auth.signInWithCredential(credential)
             .addOnCompleteListener(this) { task ->
                 if (task.isSuccessful) {
                     // Sign in success, update UI with the signed-in user's information
-                    Log.d(TAG, "signInWithCredential:success")
+                    Timber.d("signInWithCredential:success")
                     val appSingleton = application as ApplicationSingleton
                     populateViewModel(appSingleton.firestore!!)
                 } else {
                     // If sign in fails, display a message to the user.
-                    Log.w(TAG, "signInWithCredential:failure", task.exception)
+                    Timber.e(task.exception, "signInWithCredential:failure")
                     Snackbar.make(
                         window.decorView.rootView,
                         applicationContext.getString(R.string.authentication_failed),

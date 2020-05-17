@@ -1,6 +1,5 @@
 package dev.csaba.diygpstracker.data
 
-import android.util.Log
 import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.Query
@@ -15,12 +14,12 @@ import io.reactivex.ObservableEmitter
 import io.reactivex.Single
 import io.reactivex.schedulers.Schedulers
 import io.reactivex.subjects.BehaviorSubject
+import timber.log.Timber
 
 
 class FirestoreAssetRepository(secondaryDB: FirebaseFirestore) : IAssetRepository {
 
     companion object {
-        private val TAG = FirestoreAssetRepository::class.java.simpleName
         private const val ASSET_COLLECTION = "Assets"
     }
 
@@ -40,7 +39,7 @@ class FirestoreAssetRepository(secondaryDB: FirebaseFirestore) : IAssetRepositor
                     }
 
                     value.documentChanges.forEach {
-                        Log.d(TAG, "Data changed type ${it.type} document ${it.document.id}")
+                        Timber.d("Data changed type ${it.type} document ${it.document.id}")
                     }
                 }
 
