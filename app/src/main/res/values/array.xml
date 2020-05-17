@@ -18,4 +18,14 @@
         <item>43200</item>
         <item>525600</item>
     </string-array>
+    <string-array name="authentication_type_display">
+        <item>Email/Password</item>
+        <item>Google</item>
+        <item>Anonymous</item>
+    </string-array>
+    <string-array name="authentication_type_value">
+        <item>email</item>
+        <item>google</item>
+        <item>anonymous</item>
+    </string-array>
 </resources>

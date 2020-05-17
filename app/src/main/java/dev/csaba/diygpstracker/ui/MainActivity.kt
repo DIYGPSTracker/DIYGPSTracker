@@ -80,9 +80,9 @@ class MainActivity : AppCompatActivityWithActionBar(), OnAssetInputListener {
         // Authenticate
         auth = FirebaseAuth.getInstance(appSingleton.firebaseApp!!)
         val shouldAuthenticate = auth.currentUser == null || auth.currentUser!!.uid.isBlank() ||
-                projectConfiguration.googleAuth && auth.currentUser!!.isAnonymous
+                projectConfiguration.authType != "anonymous" && auth.currentUser!!.isAnonymous
         if (shouldAuthenticate) {
-            if (projectConfiguration.googleAuth) {
+            if (projectConfiguration.authType == "google") {
                 val signInOptions = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
                     .requestIdToken(getString(R.string.default_web_client_id))
                     .requestEmail()
@@ -96,6 +96,21 @@ class MainActivity : AppCompatActivityWithActionBar(), OnAssetInputListener {
                     val signInIntent = googleSignInClient.signInIntent
                     startActivityForResult(signInIntent, RC_SIGN_IN)
                 }
+            } else if (projectConfiguration.authType == "email") {
+                auth.signInWithEmailAndPassword(projectConfiguration.email, projectConfiguration.code)
+                    .addOnCompleteListener(this) { task ->
+                        if (task.isSuccessful) {
+                            Log.d(TAG, "signInWithEmailAndPassword:success")
+                            populateViewModel(appSingleton.firestore!!)
+                        } else {
+                            Log.w(TAG, "signInWithEmailAndPassword:failure", task.exception)
+                            Snackbar.make(
+                                window.decorView.rootView,
+                                applicationContext.getString(R.string.authentication_failed),
+                                Snackbar.LENGTH_SHORT
+                            ).show()
+                        }
+                    }
             } else {
                 auth.signInAnonymously()
                     .addOnCompleteListener(this) { task ->

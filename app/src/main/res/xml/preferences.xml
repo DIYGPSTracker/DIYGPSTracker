@@ -31,11 +31,36 @@
         app:summary="@string/api_key_help"
         android:icon="@drawable/ic_three"/>
 
-    <CheckBoxPreference
-        app:key="auth_type"
-        app:title="@string/google_auth_title"
-        app:summary="@string/google_auth_help"
+    <DropDownPreference
+        android:key="auth_type"
+        android:title="@string/google_auth_title"
+        android:summary="@string/google_auth_help"
+        android:entries="@array/authentication_type_display"
+        android:entryValues="@array/authentication_type_value"
+        android:defaultValue="10"
         android:icon="@drawable/ic_identity"/>
+
+    <EditTextPreference
+        app:key="email"
+        app:title="@string/email_title"
+        app:summary="@string/email_help"
+        android:icon="@drawable/ic_email"/>
+
+    <EditTextPreference
+        app:key="code"
+        app:title="@string/code_title"
+        app:summary="@string/code_help"
+        android:inputType="textPassword"
+        android:icon="@drawable/ic_key"/>
+
+    <DropDownPreference
+        android:key="look_back_minutes"
+        android:title="@string/look_back_minutes"
+        android:summary="@string/look_back_minutes_help"
+        android:entries="@array/look_back_minutes_display"
+        android:entryValues="@array/look_back_minutes_value"
+        android:defaultValue="10"
+        android:icon="@drawable/ic_history"/>
 
     <Preference
         android:key="connect_button"

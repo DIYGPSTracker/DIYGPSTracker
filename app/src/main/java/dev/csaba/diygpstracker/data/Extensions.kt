@@ -5,8 +5,8 @@ import androidx.fragment.app.FragmentActivity
 import androidx.preference.PreferenceManager
 
 
-fun getPreferenceString(preferences: SharedPreferences, name: String): String {
-    return preferences.getString(name, "") ?: return ""
+fun getPreferenceString(preferences: SharedPreferences, name: String, defValue: String = ""): String {
+    return preferences.getString(name, defValue) ?: return ""
 }
 
 fun mapValueToInterval(intervals: IntArray, value: Int): Int {
@@ -25,15 +25,20 @@ fun FragmentActivity.getSecondaryFirebaseConfiguration(): FirebaseProjectConfigu
         getPreferenceString(preferences, "project_id"),
         getPreferenceString(preferences, "application_id"),
         getPreferenceString(preferences, "api_key"),
-        preferences.getBoolean("auth_type", false)
+        getPreferenceString(preferences, "auth_type", "email"),
+        getPreferenceString(preferences, "email"),
+        getPreferenceString(preferences, "code"),
+        preferences.getString("look_back_minutes", "10")!!.toInt()
     )
 }
 
 fun FragmentActivity.hasAuthConfiguration(): Boolean {
     val configuration = this.getSecondaryFirebaseConfiguration()
     return configuration.projectId.isNotBlank() &&
-            configuration.applicationId.isNotBlank() &&
-            configuration.apiKey.isNotBlank()
+        configuration.applicationId.isNotBlank() &&
+        configuration.apiKey.isNotBlank() &&
+        (configuration.authType != "email" ||
+            (configuration.email.isNotBlank() && configuration.code.isNotBlank()))
 }
 
 fun FragmentActivity.getAssetId(): String {

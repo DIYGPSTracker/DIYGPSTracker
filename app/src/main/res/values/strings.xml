@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">DIY GPS Tracker</string>
+    <string name="app_name">DIY GPS Manager</string>
     <string name="asset_name_hint">Asset name</string>
     <string name="add_button_title">Add</string>
     <string name="firestore_configuration">Firestore Configuration</string>
@@ -11,7 +11,11 @@
     <string name="api_key_title">API Key</string>
     <string name="api_key_help">API Key of your Firebase / Firestore project</string>
     <string name="google_auth_title">Authentication Type</string>
-    <string name="google_auth_help">On: Google, Off: Anonymous</string>
+    <string name="google_auth_help">Advising Email+password, try to avoid Anonymous</string>
+    <string name="email_title">Email</string>
+    <string name="email_help">(optional) Email in case of Email+password auth</string>
+    <string name="code_title">Password</string>
+    <string name="code_help">(optional) Password in case of Email+password auth</string>
     <string name="settings_help_key">settings_help</string>
     <string name="settings_help">Create your own Firestore project to store your own data. For detailed explanation see <a href="https://diygpstracker.github.io/" target="_blank">DIY GPS Tracker</a></string>
     <string name="settings_button_title">Settings</string>
