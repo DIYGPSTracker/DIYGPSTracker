@@ -30,4 +30,8 @@
     <string name="uncofigured_firestore">Firestore not configured. Please specify Project ID, Application ID, and API Key then connect.</string>
     <string name="asset_button_title">Asset List</string>
     <string name="tracking_help">See LocationManager or FusedLocationAPI info below:</string>
+    <string name="time_stamp">Time stamp</string>
+    <string name="lat">Lat:</string>
+    <string name="lon">Lon:</string>
+    <string name="batt">Batt:</string>
 </resources>

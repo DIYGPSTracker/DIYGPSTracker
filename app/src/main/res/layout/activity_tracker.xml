@@ -17,13 +17,85 @@
         android:text="@string/tracking_help" />
 
     <com.google.android.material.textview.MaterialTextView
-        android:id="@+id/locationInfo"
+        android:id="@+id/timeStamp"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_margin="10dp"
         android:textAlignment="center"
         android:textSize="24sp"
         app:layout_constraintTop_toBottomOf="@+id/trackingHelp"
-        android:text="" />
+        android:text="@string/time_stamp" />
+
+    <com.google.android.material.textview.MaterialTextView
+        android:id="@+id/latLabel"
+        android:layout_width="wrap_content"
+        android:layout_height="0dp"
+        android:layout_margin="10dp"
+        android:textAlignment="textStart"
+        android:textSize="24sp"
+        app:layout_constraintTop_toBottomOf="@+id/timeStamp"
+        app:layout_constraintStart_toStartOf="@+id/trackingHelp"
+        app:layout_constraintEnd_toStartOf="@+id/latValue"
+        android:text="@string/lat" />
+
+    <com.google.android.material.textview.MaterialTextView
+        android:id="@+id/latValue"
+        android:layout_width="wrap_content"
+        android:layout_height="0dp"
+        android:layout_margin="10dp"
+        android:textAlignment="center"
+        android:textSize="24sp"
+        app:layout_constraintTop_toBottomOf="@+id/timeStamp"
+        app:layout_constraintStart_toEndOf="@+id/latLabel"
+        app:layout_constraintEnd_toEndOf="@id/trackingHelp"
+        android:text="0.0" />
+
+    <com.google.android.material.textview.MaterialTextView
+        android:id="@+id/lonLabel"
+        android:layout_width="wrap_content"
+        android:layout_height="0dp"
+        android:layout_margin="10dp"
+        android:textAlignment="textStart"
+        android:textSize="24sp"
+        app:layout_constraintTop_toBottomOf="@+id/latLabel"
+        app:layout_constraintStart_toStartOf="@+id/trackingHelp"
+        app:layout_constraintEnd_toStartOf="@+id/lonValue"
+        android:text="@string/lon" />
+
+    <com.google.android.material.textview.MaterialTextView
+        android:id="@+id/lonValue"
+        android:layout_width="wrap_content"
+        android:layout_height="0dp"
+        android:layout_margin="10dp"
+        android:textAlignment="center"
+        android:textSize="24sp"
+        app:layout_constraintTop_toBottomOf="@+id/latLabel"
+        app:layout_constraintStart_toEndOf="@+id/lonLabel"
+        app:layout_constraintEnd_toEndOf="@id/trackingHelp"
+        android:text="0.0" />
+
+    <com.google.android.material.textview.MaterialTextView
+        android:id="@+id/battLabel"
+        android:layout_width="wrap_content"
+        android:layout_height="0dp"
+        android:layout_margin="10dp"
+        android:textAlignment="textStart"
+        android:textSize="24sp"
+        app:layout_constraintTop_toBottomOf="@+id/lonLabel"
+        app:layout_constraintStart_toStartOf="@+id/trackingHelp"
+        app:layout_constraintEnd_toStartOf="@+id/battValue"
+        android:text="@string/batt" />
+
+    <com.google.android.material.textview.MaterialTextView
+        android:id="@+id/battValue"
+        android:layout_width="wrap_content"
+        android:layout_height="0dp"
+        android:layout_margin="10dp"
+        android:textAlignment="center"
+        android:textSize="24sp"
+        app:layout_constraintTop_toBottomOf="@+id/lonLabel"
+        app:layout_constraintStart_toEndOf="@+id/battLabel"
+        app:layout_constraintEnd_toEndOf="@id/trackingHelp"
+        android:text="0.0" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

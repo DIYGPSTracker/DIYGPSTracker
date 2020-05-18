@@ -20,6 +20,7 @@ import dev.csaba.diygpstracker.ApplicationSingleton
 import dev.csaba.diygpstracker.R
 import dev.csaba.diygpstracker.viewmodel.TrackerViewModel
 import timber.log.Timber
+import java.util.*
 
 
 class TrackerActivity : AppCompatActivityWithActionBar(), android.location.LocationListener,
@@ -141,11 +142,16 @@ class TrackerActivity : AppCompatActivityWithActionBar(), android.location.Locat
 
     override fun onLocationChanged(location: Location?) {
         if (location != null) {
-            val locationInfoTextView = findViewById<View>(R.id.locationInfo) as TextView
             val batteryLevel = getBatteryLevel()
-            locationInfoTextView.text =
-                "Lat: ${location.latitude}, Lon: ${location.longitude}, Batt: ${batteryLevel}"
             viewModel.addReport(location.latitude, location.longitude, batteryLevel)
+            val latTextView = findViewById<View>(R.id.latValue) as TextView
+            latTextView.text = location.latitude.toString()
+            val lonTextView = findViewById<View>(R.id.lonValue) as TextView
+            lonTextView.text = location.longitude.toString()
+            val battTextView = findViewById<View>(R.id.battValue) as TextView
+            battTextView.text = batteryLevel.toString()
+            val timeStampTextView = findViewById<View>(R.id.timeStamp) as TextView
+            timeStampTextView.text = Date().toString()
         }
     }
 
