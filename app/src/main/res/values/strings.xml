@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">DIY GPS Manager</string>
+    <string name="app_name">DIY GPS Tracker</string>
     <string name="asset_name_hint">Asset name</string>
     <string name="add_button_title">Add</string>
     <string name="firestore_configuration">Firestore Configuration</string>
