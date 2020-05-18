@@ -8,6 +8,8 @@ import android.location.Location
 import android.location.LocationManager
 import android.os.BatteryManager
 import android.os.Bundle
+import android.view.View
+import android.widget.TextView
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import com.google.android.gms.common.ConnectionResult
@@ -26,7 +28,6 @@ class TrackerActivity : AppCompatActivityWithActionBar(), android.location.Locat
 
     companion object {
         private const val REQUEST_LOCATION_PERMISSION = 1
-        private const val LOCATION_TRACKER_JOB_ID = 9002
         private const val GPS_UPDATE_TIME_MS = 10000L
         private const val DISPLACEMENT_THRESHOLD = 1.0f
     }
@@ -140,7 +141,11 @@ class TrackerActivity : AppCompatActivityWithActionBar(), android.location.Locat
 
     override fun onLocationChanged(location: Location?) {
         if (location != null) {
-            viewModel.addReport(location.latitude, location.longitude, getBatteryLevel())
+            val locationInfoTextView = findViewById<View>(R.id.locationInfo) as TextView
+            val batteryLevel = getBatteryLevel()
+            locationInfoTextView.text =
+                "Lat: ${location.latitude}, Lon: ${location.longitude}, Batt: ${batteryLevel}"
+            viewModel.addReport(location.latitude, location.longitude, batteryLevel)
         }
     }
 
