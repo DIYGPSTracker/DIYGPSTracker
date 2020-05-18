@@ -24,8 +24,6 @@
     <string name="connect_key">connect_button</string>
     <string name="connect">&#xbb;Connect&#xab;</string>
     <string name="connect_help">Click connect to continue</string>
-    <string name="look_back_minutes">GPS data look back (mins)</string>
-    <string name="look_back_minutes_help">How long the Map looks back in time</string>
     <string name="home_page_url">https://diygpstracker.github.io/</string>
     <string name="privacy_policy_url">https://diygpstracker.github.io/privacypolicy</string>
     <string name="authentication_failed">Authentication failed.</string>

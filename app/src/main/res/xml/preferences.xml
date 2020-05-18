@@ -53,15 +53,6 @@
         android:inputType="textPassword"
         android:icon="@drawable/ic_key"/>
 
-    <DropDownPreference
-        android:key="look_back_minutes"
-        android:title="@string/look_back_minutes"
-        android:summary="@string/look_back_minutes_help"
-        android:entries="@array/look_back_minutes_display"
-        android:entryValues="@array/look_back_minutes_value"
-        android:defaultValue="10"
-        android:icon="@drawable/ic_history"/>
-
     <Preference
         android:key="connect_button"
         android:persistent="false"

@@ -7,6 +7,5 @@ data class FirebaseProjectConfiguration(
     var apiKey: String = "",
     var authType: String = "email",
     var email: String = "",
-    var code: String = "",
-    var lookBackMinutes: Int = 10
+    var code: String = ""
 )
