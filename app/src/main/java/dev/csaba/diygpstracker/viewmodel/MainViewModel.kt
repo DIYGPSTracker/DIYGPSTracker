@@ -37,39 +37,6 @@ class MainViewModel(firestore: FirebaseFirestore) : ViewModel() {
             .addTo(disposable)
     }
 
-    fun deleteAsset(assetId: String) {
-        repository.deleteAsset(assetId)
-            .subscribeOn(Schedulers.io())
-            .subscribe(
-                {},
-                {
-                    it.printStackTrace()
-                })
-            .addTo(disposable)
-    }
-
-    fun addAsset(assetTitle: String) {
-        repository.addAsset(Asset("${System.currentTimeMillis()}", assetTitle))
-            .subscribeOn(Schedulers.io())
-            .subscribe(
-                {},
-                {
-                    it.printStackTrace()
-                })
-            .addTo(disposable)
-    }
-
-    fun flipAssetLockState(assetId: String, lockState: Boolean) {
-        repository.flipAssetLockState(assetId, lockState)
-            .subscribeOn(Schedulers.io())
-            .subscribe(
-                {},
-                {
-                    it.printStackTrace()
-                })
-            .addTo(disposable)
-    }
-
     fun setAssetLockRadius(assetId: String, lockRadius: Int) {
         repository.setAssetLockRadius(assetId, lockRadius)
             .subscribeOn(Schedulers.io())

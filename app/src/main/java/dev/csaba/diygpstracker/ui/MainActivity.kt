@@ -176,11 +176,6 @@ class MainActivity : AppCompatActivityWithActionBar(), OnAssetInputListener {
         viewModel.assetList.observe(this, Observer {
             assetAdapter.setItems(it)
         })
-
-        addAsset.setOnClickListener {
-            viewModel.addAsset(assetTitle.text.toString())
-            assetTitle.text?.clear()
-        }
     }
 
     override fun onTrackClick(assetId: String) {
