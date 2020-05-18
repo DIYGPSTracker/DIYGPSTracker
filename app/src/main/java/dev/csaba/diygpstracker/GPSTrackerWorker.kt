@@ -9,14 +9,12 @@ class GPSTrackerWorker(context: Context, params: WorkerParameters) :
     CoroutineWorker(context, params) {
 
     companion object {
-        private val TAG = GPSTrackerWorker::class.java.simpleName
+//        val data = workDataOf(
+//            KEY_MY_INT to myIntVar,
+//            KEY_MY_INT_ARRAY to myIntArray,
+//            KEY_MY_STRING to myString
+//        )
     }
-
-//    val data = workDataOf(
-//        KEY_MY_INT to myIntVar,
-//        KEY_MY_INT_ARRAY to myIntArray,
-//        KEY_MY_STRING to myString
-//    )
 
     override suspend fun doWork(): Result {
         val serverUrl = inputData.getString("SERVER_URL")
