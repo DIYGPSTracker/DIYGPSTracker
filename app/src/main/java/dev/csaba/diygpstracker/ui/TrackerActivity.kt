@@ -48,6 +48,7 @@ class TrackerActivity : AppCompatActivityWithActionBar(), android.location.Locat
         val assetId = intent.getStringExtra("assetId")
         if (assetId != null && appSingleton.firestore != null) {
             viewModel = TrackerViewModel(appSingleton.firestore!!, assetId)
+            obtainLocationPermission()
         }
     }
 
@@ -98,7 +99,7 @@ class TrackerActivity : AppCompatActivityWithActionBar(), android.location.Locat
     }
 
     private fun buildGoogleApiClient() {
-        val googleApiClient = GoogleApiClient.Builder(applicationContext)
+        googleApiClient = GoogleApiClient.Builder(applicationContext)
             .addConnectionCallbacks(this)
             .addOnConnectionFailedListener(this)
             .addApi(LocationServices.API)
@@ -132,7 +133,6 @@ class TrackerActivity : AppCompatActivityWithActionBar(), android.location.Locat
         // 2. Google API Location Services
         buildGoogleApiClient()
         getLocationRequest()
-        LocationServices.FusedLocationApi.requestLocationUpdates(googleApiClient, locationRequest, this)
     }
 
     private fun getBatteryLevel(): Double {
@@ -163,6 +163,7 @@ class TrackerActivity : AppCompatActivityWithActionBar(), android.location.Locat
 
     override fun onConnected(extras: Bundle?) {
         Timber.d("Google Api Client connected")
+        LocationServices.FusedLocationApi.requestLocationUpdates(googleApiClient, locationRequest, this)
     }
 
     override fun onConnectionSuspended(status: Int) {
