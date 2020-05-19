@@ -71,42 +71,6 @@ class FirestoreAssetRepository(secondaryDB: FirebaseFirestore) : IAssetRepositor
 
     private fun mapDocumentToRemoteAsset(document: DocumentSnapshot) = document.toObject(RemoteAsset::class.java)!!.apply { id = document.id }
 
-    override fun setAssetLockRadius(assetId: String, lockRadius: Int): Completable {
-        return Completable.create { emitter ->
-            remoteDB.collection(ASSET_COLLECTION)
-                .document(assetId)
-                .update(mapToLockRadiusUpdate(lockRadius * 25))
-                .addOnSuccessListener {
-                    if (!emitter.isDisposed) {
-                        emitter.onComplete()
-                    }
-                }
-                .addOnFailureListener {
-                    if (!emitter.isDisposed) {
-                        emitter.onError(it)
-                    }
-                }
-        }
-    }
-
-    override fun setAssetPeriodInterval(assetId: String, periodIntervalProgress: Int): Completable {
-        return Completable.create { emitter ->
-            remoteDB.collection(ASSET_COLLECTION)
-                .document(assetId)
-                .update(mapToPeriodIntervalUpdate(periodIntervalProgress))
-                .addOnSuccessListener {
-                    if (!emitter.isDisposed) {
-                        emitter.onComplete()
-                    }
-                }
-                .addOnFailureListener {
-                    if (!emitter.isDisposed) {
-                        emitter.onError(it)
-                    }
-                }
-        }
-    }
-
     override fun getChangeObservable(): Observable<List<Asset>> =
         changeObservable.hide()
             .observeOn(Schedulers.io())

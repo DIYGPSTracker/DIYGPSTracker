@@ -9,8 +9,5 @@ interface IAssetRepository {
 
     fun getAllAssets(): Single<List<Asset>>
 
-    fun setAssetLockRadius(assetId: String, lockRadius: Int): Completable
-    fun setAssetPeriodInterval(assetId: String, periodIntervalProgress: Int): Completable
-
     fun getChangeObservable(): Observable<List<Asset>>
 }
