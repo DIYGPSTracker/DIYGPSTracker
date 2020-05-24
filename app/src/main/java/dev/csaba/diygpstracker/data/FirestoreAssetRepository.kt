@@ -2,13 +2,8 @@ package dev.csaba.diygpstracker.data
 
 import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.FirebaseFirestore
-import com.google.firebase.firestore.Query
-import dev.csaba.diygpstracker.data.remote.getLockUpdate
 import dev.csaba.diygpstracker.data.remote.mapToAsset
-import dev.csaba.diygpstracker.data.remote.mapToLockRadiusUpdate
-import dev.csaba.diygpstracker.data.remote.mapToPeriodIntervalUpdate
 import dev.csaba.diygpstracker.data.remote.RemoteAsset
-import io.reactivex.Completable
 import io.reactivex.Observable
 import io.reactivex.ObservableEmitter
 import io.reactivex.Single
