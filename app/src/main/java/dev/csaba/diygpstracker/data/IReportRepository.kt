@@ -7,7 +7,9 @@ interface IReportRepository {
 
     fun addReport(report: Report): Completable
 
+    fun setAssetLockLocation(lat: Double, lon: Double): Completable
+
     fun setAssetPeriodInterval(periodIntervalProgress: Int): Completable
 
-    fun getChangeObservable(): Observable<Asset>
+    fun getAssetChangeObservable(): Observable<Asset>
 }

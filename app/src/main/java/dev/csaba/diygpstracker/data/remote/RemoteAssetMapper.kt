@@ -68,6 +68,14 @@ fun mapToPeriodIntervalUpdate(periodIntervalProgress: Int): HashMap<String, Any>
     )
 }
 
+fun mapToLockLocationUpdate(lat: Double, lon: Double): HashMap<String, Any> {
+    return hashMapOf(
+        "lockLat" to lat,
+        "lockLon" to lon,
+        "updated" to mapDateToTimestamp(Date())
+    )
+}
+
 fun getLockUpdate(lockState: Boolean): HashMap<String, Any> {
     return hashMapOf(
         "lock" to lockState,

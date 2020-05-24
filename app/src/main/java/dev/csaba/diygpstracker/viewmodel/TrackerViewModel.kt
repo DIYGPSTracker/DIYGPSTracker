@@ -1,6 +1,5 @@
 package dev.csaba.diygpstracker.viewmodel
 
-import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.google.firebase.firestore.FirebaseFirestore
@@ -16,20 +15,18 @@ import dev.csaba.diygpstracker.data.Report
 
 class TrackerViewModel(firestore: FirebaseFirestore, assetId: String) : ViewModel() {
 
-    private val _asset = MutableLiveData<Asset>()
-    val asset: LiveData<Asset>
-        get() = _asset
+    var asset = MutableLiveData<Asset>()
 
     private var repository: IReportRepository = FirestoreReportRepository(firestore, assetId)
 
     private val disposable = CompositeDisposable()
 
     init {
-        repository.getChangeObservable()
+        repository.getAssetChangeObservable()
             .observeOn(AndroidSchedulers.mainThread())
             .subscribe (
                 {
-                    _asset = it
+                    asset = MutableLiveData(it)
                 },
                 {
                     it.printStackTrace()
@@ -42,6 +39,28 @@ class TrackerViewModel(firestore: FirebaseFirestore, assetId: String) : ViewMode
         repository.addReport(
             Report("${System.currentTimeMillis()}", lat, lon, battery)
         )
+            .subscribeOn(Schedulers.io())
+            .subscribe(
+                {},
+                {
+                    it.printStackTrace()
+                })
+            .addTo(disposable)
+    }
+
+    fun setAssetLockLocation(lat: Double, lon: Double) {
+        repository.setAssetLockLocation(lat, lon)
+            .subscribeOn(Schedulers.io())
+            .subscribe(
+                {},
+                {
+                    it.printStackTrace()
+                })
+            .addTo(disposable)
+    }
+
+    fun setAssetPeriodInterval(periodIntervalProgress: Int) {
+        repository.setAssetPeriodInterval(periodIntervalProgress)
             .subscribeOn(Schedulers.io())
             .subscribe(
                 {},

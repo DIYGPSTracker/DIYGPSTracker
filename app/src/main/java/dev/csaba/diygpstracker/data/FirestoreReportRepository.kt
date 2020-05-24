@@ -2,12 +2,14 @@ package dev.csaba.diygpstracker.data
 
 import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.FirebaseFirestore
-import com.google.firebase.firestore.Query
-import dev.csaba.diygpstracker.data.remote.*
+import dev.csaba.diygpstracker.data.remote.mapToAsset
+import dev.csaba.diygpstracker.data.remote.mapToLockLocationUpdate
+import dev.csaba.diygpstracker.data.remote.mapToPeriodIntervalUpdate
+import dev.csaba.diygpstracker.data.remote.mapToReportData
+import dev.csaba.diygpstracker.data.remote.RemoteAsset
 import io.reactivex.Completable
 import io.reactivex.Observable
 import io.reactivex.ObservableEmitter
-import io.reactivex.Single
 import io.reactivex.schedulers.Schedulers
 import io.reactivex.subjects.BehaviorSubject
 import timber.log.Timber
@@ -62,6 +64,24 @@ class FirestoreReportRepository(secondaryDB: FirebaseFirestore, assetId: String)
         }
     }
 
+    override fun setAssetLockLocation(lat: Double, lon: Double): Completable {
+        return Completable.create { emitter ->
+            remoteDB.collection(ASSET_COLLECTION)
+                .document(_assetId)
+                .update(mapToLockLocationUpdate(lat, lon))
+                .addOnSuccessListener {
+                    if (!emitter.isDisposed) {
+                        emitter.onComplete()
+                    }
+                }
+                .addOnFailureListener {
+                    if (!emitter.isDisposed) {
+                        emitter.onError(it)
+                    }
+                }
+        }
+    }
+
     override fun setAssetPeriodInterval(periodIntervalProgress: Int): Completable {
         return Completable.create { emitter ->
             remoteDB.collection(ASSET_COLLECTION)
@@ -82,7 +102,7 @@ class FirestoreReportRepository(secondaryDB: FirebaseFirestore, assetId: String)
 
     private fun mapDocumentToRemoteAsset(document: DocumentSnapshot) = document.toObject(RemoteAsset::class.java)!!.apply { id = document.id }
 
-    override fun getChangeObservable(): Observable<Asset> =
+    override fun getAssetChangeObservable(): Observable<Asset> =
         changeObservable.hide()
             .observeOn(Schedulers.io())
             .map(::mapDocumentToRemoteAsset).map(::mapToAsset)

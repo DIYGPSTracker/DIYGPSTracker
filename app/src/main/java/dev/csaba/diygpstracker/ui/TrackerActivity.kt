@@ -12,6 +12,7 @@ import android.view.View
 import android.widget.TextView
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import androidx.lifecycle.Observer
 import com.google.android.gms.common.ConnectionResult
 import com.google.android.gms.common.api.GoogleApiClient
 import com.google.android.gms.location.LocationRequest
@@ -20,7 +21,7 @@ import dev.csaba.diygpstracker.ApplicationSingleton
 import dev.csaba.diygpstracker.R
 import dev.csaba.diygpstracker.viewmodel.TrackerViewModel
 import timber.log.Timber
-import java.util.*
+import java.util.Date
 
 
 class TrackerActivity : AppCompatActivityWithActionBar(), android.location.LocationListener,
@@ -39,6 +40,13 @@ class TrackerActivity : AppCompatActivityWithActionBar(), android.location.Locat
     private lateinit var batteryManager: BatteryManager
     private lateinit var googleApiClient: GoogleApiClient
     private lateinit var locationRequest: LocationRequest
+    private var remoteAssetId = ""
+    private var lastLock = false
+    private var lockLat = .0
+    private var lockLon = .0
+    private var lockRadius = 0
+    private var lastPeriodInterval = 0
+    @Volatile private var geoFenceLatch = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -50,6 +58,26 @@ class TrackerActivity : AppCompatActivityWithActionBar(), android.location.Locat
         if (assetId != null && appSingleton.firestore != null) {
             viewModel = TrackerViewModel(appSingleton.firestore!!, assetId)
             obtainLocationPermission()
+
+            viewModel.asset.observe(this, Observer {
+                if (remoteAssetId.isBlank()) {
+                    assert(assetId == it.id)
+                    remoteAssetId = it.id
+                    lastLock = it.lock
+                    lockLat = it.lockLat
+                    lockLon = it.lockLon
+                    lockRadius = it.lockRadius
+                    lastPeriodInterval = it.periodInterval
+                } else {
+                    if (it.lock && !lastLock) {
+                        // Manager is locking the asset
+                        // Need to place geo fence
+                        geoFenceLatch = true
+                    } else if (it.periodInterval != lastPeriodInterval) {
+                        // Manager manually overrides the current poll interval
+                    }
+                }
+            })
         }
     }
 
@@ -152,6 +180,22 @@ class TrackerActivity : AppCompatActivityWithActionBar(), android.location.Locat
             battTextView.text = batteryLevel.toString()
             val timeStampTextView = findViewById<View>(R.id.timeStamp) as TextView
             timeStampTextView.text = Date().toString()
+
+            // Asset is being locked, waiting for the location of the lock
+            if (geoFenceLatch) {
+                viewModel.setAssetLockLocation(location.latitude, location.longitude)
+                geoFenceLatch = false
+            }
+            // Manual geofencing
+            if (lastLock && Math.abs(lockLat) > 1e-6 && Math.abs(lockLon) > 1e-6) {
+                val latDiff = lockLat - location.latitude
+                val lonDiff = lockLon - location.longitude
+                // Asset exited the geofence
+                if (latDiff * latDiff + lonDiff * lonDiff > lockRadius * lockRadius) {
+                    // Bump up the
+                    viewModel.setAssetPeriodInterval(10)
+                }
+            }
         }
     }
 

@@ -37,28 +37,6 @@ class MainViewModel(firestore: FirebaseFirestore) : ViewModel() {
             .addTo(disposable)
     }
 
-    fun setAssetLockRadius(assetId: String, lockRadius: Int) {
-        repository.setAssetLockRadius(assetId, lockRadius)
-            .subscribeOn(Schedulers.io())
-            .subscribe(
-                {},
-                {
-                    it.printStackTrace()
-                })
-            .addTo(disposable)
-    }
-
-    fun setAssetPeriodInterval(assetId: String, periodIntervalProgress: Int) {
-        repository.setAssetPeriodInterval(assetId, periodIntervalProgress)
-            .subscribeOn(Schedulers.io())
-            .subscribe(
-                {},
-                {
-                    it.printStackTrace()
-                })
-            .addTo(disposable)
-    }
-
     override fun onCleared() {
         super.onCleared()
         disposable.clear()
