@@ -14,6 +14,7 @@ fun mapToAsset(remoteAsset: RemoteAsset): Asset {
         remoteAsset.lockLat,
         remoteAsset.lockLon,
         remoteAsset.lockRadius,
+        remoteAsset.lockAlert,
         remoteAsset.periodInterval,
         remoteAsset.created.toDate(),
         remoteAsset.updated.toDate()
@@ -22,27 +23,6 @@ fun mapToAsset(remoteAsset: RemoteAsset): Asset {
 
 fun mapDateToTimestamp(date: Date): Timestamp {
     return Timestamp(date.time / 1000, (date.time % 1000 * 1000).toInt())
-}
-
-fun mapToRemoteAsset(asset: Asset): RemoteAsset {
-    return RemoteAsset(
-        asset.id,
-        asset.title,
-        asset.lock,
-        asset.lockLat,
-        asset.lockLon,
-        asset.lockRadius,
-        asset.periodInterval,
-        mapDateToTimestamp(asset.created),
-        mapDateToTimestamp(asset.updated)
-    )
-}
-
-fun mapToLockRadiusUpdate(lockRadius: Int): HashMap<String, Any> {
-    return hashMapOf(
-        "lockRadius" to lockRadius,
-        "updated" to mapDateToTimestamp(Date())
-    )
 }
 
 fun mapPeriodIntervalToProgress(periodInterval: Int): Int {
@@ -72,13 +52,6 @@ fun mapToLockLocationUpdate(lat: Double, lon: Double): HashMap<String, Any> {
     return hashMapOf(
         "lockLat" to lat,
         "lockLon" to lon,
-        "updated" to mapDateToTimestamp(Date())
-    )
-}
-
-fun getLockUpdate(lockState: Boolean): HashMap<String, Any> {
-    return hashMapOf(
-        "lock" to lockState,
         "updated" to mapDateToTimestamp(Date())
     )
 }

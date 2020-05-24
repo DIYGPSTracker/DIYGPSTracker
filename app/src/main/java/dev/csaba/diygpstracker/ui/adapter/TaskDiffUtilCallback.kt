@@ -21,6 +21,7 @@ class AssetDiffUtilCallback(
                 oldList[oldItemPosition].lockLat == newList[newItemPosition].lockLat &&
                 oldList[oldItemPosition].lockLon == newList[newItemPosition].lockLon &&
                 oldList[oldItemPosition].lockRadius == newList[newItemPosition].lockRadius &&
+                oldList[oldItemPosition].lockAlert == newList[newItemPosition].lockAlert &&
                 oldList[oldItemPosition].periodInterval == newList[newItemPosition].periodInterval
     }
 }
