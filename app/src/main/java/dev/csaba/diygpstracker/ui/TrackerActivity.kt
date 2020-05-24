@@ -32,6 +32,8 @@ class TrackerActivity : AppCompatActivityWithActionBar(), android.location.Locat
         private const val REQUEST_LOCATION_PERMISSION = 1
         private const val GPS_UPDATE_TIME_MS = 10000L
         private const val DISPLACEMENT_THRESHOLD = 1.0f
+        private const val EQATORIAL_EARTH_RADIUS = 6378.1370
+        private const val D2R = Math.PI / 180.0
     }
 
     private lateinit var viewModel: TrackerViewModel
@@ -168,6 +170,16 @@ class TrackerActivity : AppCompatActivityWithActionBar(), android.location.Locat
         return batteryManager.getIntProperty(BatteryManager.BATTERY_PROPERTY_CAPACITY).toDouble()
     }
 
+    private fun haversineGPSDistance(lat1: Double, lon1: Double, lat2: Double, lon2: Double): Double {
+        val lonDiff = (lon2 - lon1) * D2R
+        val latDiff = (lat2 - lat1) * D2R
+        val latSin = Math.sin(latDiff / 2.0)
+        val lonSin = Math.sin(lonDiff / 2.0)
+        val a = latSin * latSin + (Math.cos(lat1 * D2R) * Math.cos(lat2 * D2R) * lonSin * lonSin)
+        val c = 2.0 * Math.atan2(Math.sqrt(a), Math.sqrt(1.0 - a))
+        return EQATORIAL_EARTH_RADIUS * c
+    }
+
     override fun onLocationChanged(location: Location?) {
         if (location != null) {
             val batteryLevel = getBatteryLevel()
@@ -186,13 +198,12 @@ class TrackerActivity : AppCompatActivityWithActionBar(), android.location.Locat
                 viewModel.setAssetLockLocation(location.latitude, location.longitude)
                 geoFenceLatch = false
             }
-            // Manual geofencing
+            // Manual geo-fencing
             if (lastLock && Math.abs(lockLat) > 1e-6 && Math.abs(lockLon) > 1e-6) {
-                val latDiff = lockLat - location.latitude
-                val lonDiff = lockLon - location.longitude
-                // Asset exited the geofence
-                if (latDiff * latDiff + lonDiff * lonDiff > lockRadius * lockRadius) {
-                    // Bump up the
+                val gpsDistance = haversineGPSDistance(lockLat, lockLon, location.latitude, location.longitude)
+                // Asset exited the geo-fence
+                if (gpsDistance >= lockRadius) {
+                    // Kick in the interval
                     viewModel.setAssetPeriodInterval(10)
                 }
             }
