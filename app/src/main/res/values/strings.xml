@@ -34,4 +34,5 @@
     <string name="lat">Lat:</string>
     <string name="lon">Lon:</string>
     <string name="batt">Batt:</string>
+    <string name="status_icon">Status Indicator Icon (if Alarm got triggered or not)</string>
 </resources>

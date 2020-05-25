@@ -33,12 +33,23 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/trackAsset" />
 
+    <ImageView
+        android:id="@+id/statusIcon"
+        android:layout_width="26dp"
+        android:layout_height="wrap_content"
+        app:layout_constraintTop_toTopOf="@+id/assetTitle"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintBottom_toBottomOf="@+id/assetTitle"
+        app:srcCompat="@drawable/ic_check_circle"
+        android:contentDescription="@string/status_icon" />
+
     <TextView
         android:id="@+id/assetTitle"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
         app:layout_constraintEnd_toStartOf="@id/trackAsset"
-        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/statusIcon"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintBottom_toTopOf="@+id/assetLockLat"
         android:layout_marginEnd="8dp"
@@ -51,7 +62,7 @@
         android:id="@+id/assetLockLat"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        app:layout_constraintStart_toStartOf="@id/assetTitle"
+        app:layout_constraintStart_toStartOf="@id/statusIcon"
         app:layout_constraintEnd_toStartOf="@id/assetLockLon"
         app:layout_constraintTop_toBottomOf="@id/assetTitle"
         app:layout_constraintBottom_toTopOf="@id/assetLockRadiusSeekBar"
@@ -77,7 +88,7 @@
         android:id="@+id/assetLockRadius"
         android:layout_width="60dp"
         android:layout_height="wrap_content"
-        app:layout_constraintStart_toStartOf="@id/assetTitle"
+        app:layout_constraintStart_toStartOf="@id/statusIcon"
         app:layout_constraintEnd_toStartOf="@id/assetLockRadiusSeekBar"
         app:layout_constraintTop_toBottomOf="@id/assetLockLat"
         android:textSize="16sp"
@@ -102,7 +113,7 @@
         android:id="@+id/assetPeriodInterval"
         android:layout_width="60dp"
         android:layout_height="wrap_content"
-        app:layout_constraintStart_toStartOf="@id/assetTitle"
+        app:layout_constraintStart_toStartOf="@id/statusIcon"
         app:layout_constraintEnd_toStartOf="@id/assetPeriodIntervalSeekBar"
         app:layout_constraintTop_toBottomOf="@id/assetLockRadiusSeekBar"
         android:paddingTop="1dp"
