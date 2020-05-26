@@ -77,6 +77,7 @@ class TrackerActivity : AppCompatActivityWithActionBar(), android.location.Locat
                         geoFenceLatch = true
                     } else if (it.periodInterval != lastPeriodInterval) {
                         // Manager manually overrides the current poll interval
+                        // TODO re-register
                     }
                 }
             })
@@ -125,7 +126,7 @@ class TrackerActivity : AppCompatActivityWithActionBar(), android.location.Locat
         criteria.isAltitudeRequired = false
         criteria.isBearingRequired = false
         criteria.isCostAllowed = true
-        criteria.powerRequirement = Criteria.POWER_LOW
+        criteria.powerRequirement = Criteria.POWER_MEDIUM
         return locationManager.getBestProvider(criteria, true)
     }
 
@@ -166,8 +167,8 @@ class TrackerActivity : AppCompatActivityWithActionBar(), android.location.Locat
         getLocationRequest()
     }
 
-    private fun getBatteryLevel(): Double {
-        return batteryManager.getIntProperty(BatteryManager.BATTERY_PROPERTY_CAPACITY).toDouble()
+    private fun getBatteryLevel(): Int {
+        return batteryManager.getIntProperty(BatteryManager.BATTERY_PROPERTY_CAPACITY)
     }
 
     private fun haversineGPSDistance(lat1: Double, lon1: Double, lat2: Double, lon2: Double): Double {
@@ -183,11 +184,13 @@ class TrackerActivity : AppCompatActivityWithActionBar(), android.location.Locat
     override fun onLocationChanged(location: Location?) {
         if (location != null) {
             val batteryLevel = getBatteryLevel()
-            viewModel.addReport(location.latitude, location.longitude, batteryLevel)
+            viewModel.addReport(location.latitude, location.longitude, location.speed, batteryLevel)
             val latTextView = findViewById<View>(R.id.latValue) as TextView
             latTextView.text = location.latitude.toString()
             val lonTextView = findViewById<View>(R.id.lonValue) as TextView
             lonTextView.text = location.longitude.toString()
+            val speedTextView = findViewById<View>(R.id.speedValue) as TextView
+            speedTextView.text = location.speed.toString()
             val battTextView = findViewById<View>(R.id.battValue) as TextView
             battTextView.text = batteryLevel.toString()
             val timeStampTextView = findViewById<View>(R.id.timeStamp) as TextView

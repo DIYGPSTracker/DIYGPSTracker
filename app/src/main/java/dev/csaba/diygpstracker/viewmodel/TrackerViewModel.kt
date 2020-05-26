@@ -35,9 +35,9 @@ class TrackerViewModel(firestore: FirebaseFirestore, assetId: String) : ViewMode
             .addTo(disposable)
     }
 
-    fun addReport(lat: Double, lon: Double, battery: Double) {
+    fun addReport(lat: Double, lon: Double, speed: Float, battery: Int) {
         repository.addReport(
-            Report("${System.currentTimeMillis()}", lat, lon, battery)
+            Report("${System.currentTimeMillis()}", lat, lon, speed, battery)
         )
             .subscribeOn(Schedulers.io())
             .subscribe(

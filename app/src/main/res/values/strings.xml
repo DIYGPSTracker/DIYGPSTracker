@@ -34,5 +34,7 @@
     <string name="lat">Lat:</string>
     <string name="lon">Lon:</string>
     <string name="batt">Batt:</string>
+    <string name="speed">Speed:</string>
     <string name="status_icon">Status Indicator Icon (if Alarm got triggered or not)</string>
+    <string name="value_not_available">N/A</string>
 </resources>

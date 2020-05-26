@@ -48,7 +48,7 @@
         app:layout_constraintTop_toBottomOf="@+id/timeStamp"
         app:layout_constraintStart_toEndOf="@+id/latLabel"
         app:layout_constraintEnd_toEndOf="@id/trackingHelp"
-        android:text="0.0" />
+        android:text="@string/value_not_available" />
 
     <com.google.android.material.textview.MaterialTextView
         android:id="@+id/lonLabel"
@@ -72,7 +72,31 @@
         app:layout_constraintTop_toBottomOf="@+id/latLabel"
         app:layout_constraintStart_toEndOf="@+id/lonLabel"
         app:layout_constraintEnd_toEndOf="@id/trackingHelp"
-        android:text="0.0" />
+        android:text="@string/value_not_available" />
+
+    <com.google.android.material.textview.MaterialTextView
+        android:id="@+id/speedLabel"
+        android:layout_width="wrap_content"
+        android:layout_height="0dp"
+        android:layout_margin="10dp"
+        android:textAlignment="textStart"
+        android:textSize="24sp"
+        app:layout_constraintTop_toBottomOf="@+id/lonLabel"
+        app:layout_constraintStart_toStartOf="@+id/trackingHelp"
+        app:layout_constraintEnd_toStartOf="@+id/speedValue"
+        android:text="@string/speed" />
+
+    <com.google.android.material.textview.MaterialTextView
+        android:id="@+id/speedValue"
+        android:layout_width="wrap_content"
+        android:layout_height="0dp"
+        android:layout_margin="10dp"
+        android:textAlignment="center"
+        android:textSize="24sp"
+        app:layout_constraintTop_toBottomOf="@+id/lonLabel"
+        app:layout_constraintStart_toEndOf="@+id/speedLabel"
+        app:layout_constraintEnd_toEndOf="@id/trackingHelp"
+        android:text="@string/value_not_available" />
 
     <com.google.android.material.textview.MaterialTextView
         android:id="@+id/battLabel"
@@ -81,7 +105,7 @@
         android:layout_margin="10dp"
         android:textAlignment="textStart"
         android:textSize="24sp"
-        app:layout_constraintTop_toBottomOf="@+id/lonLabel"
+        app:layout_constraintTop_toBottomOf="@+id/speedLabel"
         app:layout_constraintStart_toStartOf="@+id/trackingHelp"
         app:layout_constraintEnd_toStartOf="@+id/battValue"
         android:text="@string/batt" />
@@ -93,9 +117,9 @@
         android:layout_margin="10dp"
         android:textAlignment="center"
         android:textSize="24sp"
-        app:layout_constraintTop_toBottomOf="@+id/lonLabel"
+        app:layout_constraintTop_toBottomOf="@+id/speedLabel"
         app:layout_constraintStart_toEndOf="@+id/battLabel"
         app:layout_constraintEnd_toEndOf="@id/trackingHelp"
-        android:text="0.0" />
+        android:text="@string/value_not_available" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
