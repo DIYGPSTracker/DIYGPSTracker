@@ -16,10 +16,17 @@ import dev.csaba.diygpstracker.data.Report
 class TrackerViewModel(firestore: FirebaseFirestore, assetId: String) : ViewModel() {
 
     var asset = MutableLiveData<Asset>()
-
     private var repository: IReportRepository = FirestoreReportRepository(firestore, assetId)
-
     private val disposable = CompositeDisposable()
+
+    // Saved Instance variables
+    var remoteAssetId = ""
+    var lastLock = false
+    var lockLat = .0
+    var lockLon = .0
+    var lockRadius = 0
+    var lastPeriodInterval = 0
+    @Volatile var geoFenceLatch = false
 
     init {
         repository.getAssetChangeObservable()

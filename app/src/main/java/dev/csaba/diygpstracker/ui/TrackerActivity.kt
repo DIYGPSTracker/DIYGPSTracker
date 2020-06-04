@@ -18,10 +18,12 @@ import com.google.android.gms.common.api.GoogleApiClient
 import com.google.android.gms.location.LocationRequest
 import com.google.android.gms.location.LocationServices
 import dev.csaba.diygpstracker.ApplicationSingleton
+import dev.csaba.diygpstracker.BuildConfig
 import dev.csaba.diygpstracker.R
 import dev.csaba.diygpstracker.viewmodel.TrackerViewModel
 import timber.log.Timber
 import java.util.Date
+import kotlin.math.*
 
 
 class TrackerActivity : AppCompatActivityWithActionBar(), android.location.LocationListener,
@@ -30,58 +32,60 @@ class TrackerActivity : AppCompatActivityWithActionBar(), android.location.Locat
 
     companion object {
         private const val REQUEST_LOCATION_PERMISSION = 1
-        private const val GPS_UPDATE_TIME_MS = 10000L
+        private const val GPS_UPDATE_TIME_MS = 10000
         private const val DISPLACEMENT_THRESHOLD = 1.0f
         private const val EQATORIAL_EARTH_RADIUS = 6378.1370
         private const val D2R = Math.PI / 180.0
     }
 
     private lateinit var viewModel: TrackerViewModel
-    private var isRestore = false
     private lateinit var locationManager: LocationManager
     private lateinit var batteryManager: BatteryManager
     private lateinit var googleApiClient: GoogleApiClient
     private lateinit var locationRequest: LocationRequest
-    private var remoteAssetId = ""
-    private var lastLock = false
-    private var lockLat = .0
-    private var lockLon = .0
-    private var lockRadius = 0
-    private var lastPeriodInterval = 0
-    @Volatile private var geoFenceLatch = false
+    @Volatile private var gotFirstObserve = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        isRestore = savedInstanceState != null
         setContentView(R.layout.activity_tracker)
 
         val appSingleton = application as ApplicationSingleton
         val assetId = intent.getStringExtra("assetId")
         if (assetId != null && appSingleton.firestore != null) {
             viewModel = TrackerViewModel(appSingleton.firestore!!, assetId)
-            obtainLocationPermission()
-
             viewModel.asset.observe(this, Observer {
-                if (remoteAssetId.isBlank()) {
-                    assert(assetId == it.id)
-                    remoteAssetId = it.id
-                    lastLock = it.lock
-                    lockLat = it.lockLat
-                    lockLon = it.lockLon
-                    lockRadius = it.lockRadius
-                    lastPeriodInterval = it.periodInterval
+                if (!gotFirstObserve) {
+                    gotFirstObserve = true
+                    if (BuildConfig.DEBUG && assetId != it.id) {
+                        error("Assertion failed")
+                    }
+                    viewModel.remoteAssetId = it.id
+                    viewModel.lastLock = it.lock
+                    viewModel.lockLat = it.lockLat
+                    viewModel.lockLon = it.lockLon
+                    viewModel.lockRadius = it.lockRadius
+                    viewModel.lastPeriodInterval = it.periodInterval
+                    obtainLocationPermissionAndStartTracking()
                 } else {
-                    if (it.lock && !lastLock) {
-                        // Manager is locking the asset
-                        // Need to place geo fence
-                        geoFenceLatch = true
-                    } else if (it.periodInterval != lastPeriodInterval) {
+                    if (it.lock != viewModel.lastLock) {
+                        viewModel.lastLock = it.lock
+                        if (it.lock) {
+                            // Manager is locking the asset => need to setup geo fence
+                            viewModel.geoFenceLatch = true
+                        }
+                    }
+                    if (it.periodInterval != viewModel.lastPeriodInterval) {
                         // Manager manually overrides the current poll interval
-                        // TODO re-register
+                        reScheduleLocationUpdates()
                     }
                 }
             })
         }
+    }
+
+    override fun onDestroy() {
+        removeUpdates()
+        super.onDestroy()
     }
 
     private fun isPermissionGranted() : Boolean {
@@ -91,7 +95,7 @@ class TrackerActivity : AppCompatActivityWithActionBar(), android.location.Locat
     }
 
     // Checks if users have given their location and sets location enabled if so.
-    private fun obtainLocationPermission() {
+    private fun obtainLocationPermissionAndStartTracking() {
         if (isPermissionGranted()) {
             startGpsTracking()
         } else {
@@ -114,7 +118,7 @@ class TrackerActivity : AppCompatActivityWithActionBar(), android.location.Locat
         // location data layer.
         if (requestCode == REQUEST_LOCATION_PERMISSION) {
             if (grantResults.contains(PackageManager.PERMISSION_GRANTED)) {
-                obtainLocationPermission()
+                obtainLocationPermissionAndStartTracking()
             }
         }
     }
@@ -139,32 +143,60 @@ class TrackerActivity : AppCompatActivityWithActionBar(), android.location.Locat
         googleApiClient.connect()
     }
 
+    private fun getRecentPeriodIntervalOrDefault(): Long {
+        return if (viewModel.lastPeriodInterval == 0) GPS_UPDATE_TIME_MS.toLong()
+                else viewModel.lastPeriodInterval.toLong()
+    }
+
     private fun getLocationRequest() {
         locationRequest = LocationRequest()
-        locationRequest.interval = GPS_UPDATE_TIME_MS
+        locationRequest.interval = getRecentPeriodIntervalOrDefault()
         locationRequest.smallestDisplacement = DISPLACEMENT_THRESHOLD
         locationRequest.priority = LocationRequest.PRIORITY_HIGH_ACCURACY
     }
 
     @SuppressLint("MissingPermission")
-    private fun startGpsTracking() {
-        batteryManager = getSystemService(BATTERY_SERVICE) as BatteryManager
-        // https://appus.software/blog/difference-between-locationmanager-and-google-location-api-services
-        // 1. LocationManager technique
+    private fun scheduleLocationUpdates() {
+        // 1.1. Get Location Manager
         locationManager = getSystemService(LOCATION_SERVICE) as LocationManager
+        // 1.2. Get Location Provider
         val locationProvider = getLocationProvider()
-        if (locationProvider != null) {
+        if (locationProvider != null)
+        {
+            // 1.3. Schedule Location Manager location updates
             locationManager.requestLocationUpdates(
                 locationProvider,
-                GPS_UPDATE_TIME_MS,
+                getRecentPeriodIntervalOrDefault(),
                 DISPLACEMENT_THRESHOLD,
                 this
             )
         }
+    }
+
+    private fun startGpsTracking() {
+        batteryManager = getSystemService(BATTERY_SERVICE) as BatteryManager
+        // https://appus.software/blog/difference-between-locationmanager-and-google-location-api-services
+        // 1. LocationManager technique
+        scheduleLocationUpdates()
 
         // 2. Google API Location Services
-        buildGoogleApiClient()
+        // 2.1. Construct Location Request
         getLocationRequest()
+        // 2.2. Get the Google API Client
+        buildGoogleApiClient()
+    }
+
+    private fun removeUpdates() {
+        locationManager.removeUpdates(this)
+        LocationServices.FusedLocationApi.removeLocationUpdates(googleApiClient, this)
+    }
+
+    @SuppressLint("MissingPermission")
+    private fun reScheduleLocationUpdates() {
+        removeUpdates()
+        scheduleLocationUpdates()
+        getLocationRequest()
+        LocationServices.FusedLocationApi.requestLocationUpdates(googleApiClient, locationRequest, this)
     }
 
     private fun getBatteryLevel(): Int {
@@ -174,10 +206,10 @@ class TrackerActivity : AppCompatActivityWithActionBar(), android.location.Locat
     private fun haversineGPSDistance(lat1: Double, lon1: Double, lat2: Double, lon2: Double): Double {
         val lonDiff = (lon2 - lon1) * D2R
         val latDiff = (lat2 - lat1) * D2R
-        val latSin = Math.sin(latDiff / 2.0)
-        val lonSin = Math.sin(lonDiff / 2.0)
-        val a = latSin * latSin + (Math.cos(lat1 * D2R) * Math.cos(lat2 * D2R) * lonSin * lonSin)
-        val c = 2.0 * Math.atan2(Math.sqrt(a), Math.sqrt(1.0 - a))
+        val latSin = sin(latDiff / 2.0)
+        val lonSin = sin(lonDiff / 2.0)
+        val a = latSin * latSin + (cos(lat1 * D2R) * cos(lat2 * D2R) * lonSin * lonSin)
+        val c = 2.0 * atan2(sqrt(a), sqrt(1.0 - a))
         return EQATORIAL_EARTH_RADIUS * c
     }
 
@@ -197,17 +229,19 @@ class TrackerActivity : AppCompatActivityWithActionBar(), android.location.Locat
             timeStampTextView.text = Date().toString()
 
             // Asset is being locked, waiting for the location of the lock
-            if (geoFenceLatch) {
+            if (viewModel.geoFenceLatch) {
                 viewModel.setAssetLockLocation(location.latitude, location.longitude)
-                geoFenceLatch = false
+                viewModel.geoFenceLatch = false
             }
-            // Manual geo-fencing
-            if (lastLock && Math.abs(lockLat) > 1e-6 && Math.abs(lockLon) > 1e-6) {
-                val gpsDistance = haversineGPSDistance(lockLat, lockLon, location.latitude, location.longitude)
+            // Manual geo fence checking
+            if (viewModel.lastLock && abs(viewModel.lockLat) > 1e-6 && abs(viewModel.lockLon) > 1e-6) {
+                val gpsDistance = haversineGPSDistance(viewModel.lockLat, viewModel.lockLon, location.latitude, location.longitude)
                 // Asset exited the geo-fence
-                if (gpsDistance >= lockRadius) {
+                if (gpsDistance >= viewModel.lockRadius) {
                     // Kick in the interval
                     viewModel.setAssetPeriodInterval(10)
+                    // TODO: this arrives back to the observer and differential will be calculated
+                    // TODO: and reSchedule will be applied if needed (?)
                 }
             }
         }
@@ -225,7 +259,9 @@ class TrackerActivity : AppCompatActivityWithActionBar(), android.location.Locat
         Timber.d("Location Service Provider ${provider} disabled")
     }
 
+    @SuppressLint("MissingPermission")
     override fun onConnected(extras: Bundle?) {
+        // 2.3. Schedule Fused Location updates
         Timber.d("Google Api Client connected")
         LocationServices.FusedLocationApi.requestLocationUpdates(googleApiClient, locationRequest, this)
     }
