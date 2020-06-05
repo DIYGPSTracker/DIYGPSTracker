@@ -2,21 +2,29 @@ package dev.csaba.diygpstracker.ui
 
 import android.Manifest
 import android.annotation.SuppressLint
+import android.annotation.TargetApi
+import android.app.PendingIntent
+import android.content.BroadcastReceiver
+import android.content.Context
+import android.content.Intent
+import android.content.IntentSender
 import android.content.pm.PackageManager
 import android.location.Criteria
 import android.location.Location
 import android.location.LocationManager
+import android.net.Uri
 import android.os.BatteryManager
 import android.os.Bundle
+import android.provider.Settings
 import android.view.View
 import android.widget.TextView
 import androidx.core.app.ActivityCompat
-import androidx.core.content.ContextCompat
 import androidx.lifecycle.Observer
 import com.google.android.gms.common.ConnectionResult
 import com.google.android.gms.common.api.GoogleApiClient
-import com.google.android.gms.location.LocationRequest
-import com.google.android.gms.location.LocationServices
+import com.google.android.gms.common.api.ResolvableApiException
+import com.google.android.gms.location.*
+import com.google.android.material.snackbar.Snackbar
 import dev.csaba.diygpstracker.ApplicationSingleton
 import dev.csaba.diygpstracker.BuildConfig
 import dev.csaba.diygpstracker.R
@@ -28,22 +36,104 @@ import kotlin.math.*
 
 class TrackerActivity : AppCompatActivityWithActionBar(), android.location.LocationListener,
     GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener,
-    com.google.android.gms.location.LocationListener {
+    LocationListener {
 
     companion object {
-        private const val REQUEST_LOCATION_PERMISSION = 1
         private const val GPS_UPDATE_TIME_MS = 10000
         private const val DISPLACEMENT_THRESHOLD = 1.0f
         private const val EQATORIAL_EARTH_RADIUS = 6378.1370
         private const val D2R = Math.PI / 180.0
+
+        private const val REQUEST_FOREGROUND_AND_BACKGROUND_PERMISSION_RESULT_CODE = 33
+        private const val REQUEST_FOREGROUND_ONLY_PERMISSIONS_REQUEST_CODE = 34
+        private const val REQUEST_TURN_DEVICE_LOCATION_ON = 29
+        private const val LOCATION_PERMISSION_INDEX = 0
+        private const val BACKGROUND_LOCATION_PERMISSION_INDEX = 1
+
+        internal const val ACTION_GEO_FENCE_EVENT = "TrackerActivity.action.ACTION_GEOFENCE_EVENT"
+        internal const val GEO_FENCE_SINGLETON_ID = "asset_on_demand_geofence"
+        internal const val GEO_FENCE_SINGLETON_INDEX = 1
     }
 
     private lateinit var viewModel: TrackerViewModel
     private lateinit var locationManager: LocationManager
+    private lateinit var geoFencingClient: GeofencingClient
     private lateinit var batteryManager: BatteryManager
     private lateinit var googleApiClient: GoogleApiClient
-    private lateinit var locationRequest: LocationRequest
     @Volatile private var gotFirstObserve = false
+
+    private val runningQOrLater =
+        android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.Q
+
+    public fun geoFenceExitedHandler(nativeTrigger: Boolean) {
+        // Crank up the interval
+        viewModel.setAssetPeriodInterval(10)
+        // TODO: Send notification to Manager
+        // TODO: this arrives back to the observer and differential will be calculated
+        // TODO: and reSchedule will be applied if needed (?)
+    }
+
+    /*
+     * Triggered by the Geofence. We'll need to crank up the refresh interval and send notification
+     */
+    class GeoFenceBroadcastReceiver : BroadcastReceiver() {
+        private fun errorMessage(context: Context, errorCode: Int): String {
+            val resources = context.resources
+            return when (errorCode) {
+                GeofenceStatusCodes.GEOFENCE_NOT_AVAILABLE -> resources.getString(
+                    R.string.geofence_not_available
+                )
+                GeofenceStatusCodes.GEOFENCE_TOO_MANY_GEOFENCES -> resources.getString(
+                    R.string.geofence_too_many_geofences
+                )
+                GeofenceStatusCodes.GEOFENCE_TOO_MANY_PENDING_INTENTS -> resources.getString(
+                    R.string.geofence_too_many_pending_intents
+                )
+                else -> resources.getString(R.string.unknown_geofence_error)
+            }
+        }
+
+        override fun onReceive(context: Context, intent: Intent) {
+            if (intent.action == ACTION_GEO_FENCE_EVENT) {
+                val geoFencingEvent = GeofencingEvent.fromIntent(intent)
+
+                if (geoFencingEvent.hasError()) {
+                    val errorMessage = errorMessage(context, geoFencingEvent.errorCode)
+                    Timber.e(errorMessage)
+                    return
+                }
+
+                if (geoFencingEvent.geofenceTransition == Geofence.GEOFENCE_TRANSITION_EXIT) {
+                    Timber.w(context.getString(R.string.geofence_exited))
+
+                    val fenceId = when {
+                        geoFencingEvent.triggeringGeofences.isNotEmpty() ->
+                            geoFencingEvent.triggeringGeofences[0].requestId
+                        else -> {
+                            Timber.e("No Geofence Trigger Found! Abort mission!")
+                            return
+                        }
+                    }
+
+                    if (fenceId != GEO_FENCE_SINGLETON_ID) {
+                        Timber.e("Not our geofence => no action on our end")
+                        return
+                    }
+
+                    Companion.geoFenceExitedHandler(true)
+                }
+            }
+        }
+    }
+
+    // A PendingIntent for the Broadcast Receiver that handles geofence transitions.
+    private val geoFencePendingIntent: PendingIntent by lazy {
+        val intent = Intent(this, GeoFenceBroadcastReceiver::class.java)
+        intent.action = ACTION_GEO_FENCE_EVENT
+        // Use FLAG_UPDATE_CURRENT so that you get the same pending intent back when calling
+        // addGeofences() and removeGeofences().
+        PendingIntent.getBroadcast(this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT)
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -59,24 +149,28 @@ class TrackerActivity : AppCompatActivityWithActionBar(), android.location.Locat
                     if (BuildConfig.DEBUG && assetId != it.id) {
                         error("Assertion failed")
                     }
-                    viewModel.remoteAssetId = it.id
-                    viewModel.lastLock = it.lock
-                    viewModel.lockLat = it.lockLat
-                    viewModel.lockLon = it.lockLon
-                    viewModel.lockRadius = it.lockRadius
-                    viewModel.lastPeriodInterval = it.periodInterval
+                    viewModel.updateState(it)
                     obtainLocationPermissionAndStartTracking()
                 } else {
-                    if (it.lock != viewModel.lastLock) {
-                        viewModel.lastLock = it.lock
+                    val lockChanged = it.lock != viewModel.lastLock
+                    val intervalChanged = it.periodInterval != viewModel.lastPeriodInterval
+                    val radiusChanged = it.lockRadius != viewModel.lockRadius
+                    viewModel.updateState(it)
+                    if (lockChanged) {
                         if (it.lock) {
                             // Manager is locking the asset => need to setup geo fence
                             viewModel.geoFenceLatch = true
+                        } else {
+                            removeGeoFences()
                         }
                     }
-                    if (it.periodInterval != viewModel.lastPeriodInterval) {
+                    if (intervalChanged) {
                         // Manager manually overrides the current poll interval
                         reScheduleLocationUpdates()
+                    }
+                    if (radiusChanged && !viewModel.geoFenceLatch) {
+                        removeGeoFences(true)
+                        addNativeGeoFence(it.lockLat, it.lockLon)
                     }
                 }
             })
@@ -84,53 +178,163 @@ class TrackerActivity : AppCompatActivityWithActionBar(), android.location.Locat
     }
 
     override fun onDestroy() {
+        removeGeoFences()
         removeUpdates()
         super.onDestroy()
     }
 
-    private fun isPermissionGranted() : Boolean {
-        return ContextCompat.checkSelfPermission(
-            this,
-            Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED
+    /*
+     *  When we get the result from asking the user to turn on device location, we call
+     *  checkLocationIsOnAndStartGpsTracking again to make sure it's actually on, but
+     *  we don't resolve the check to keep the user from seeing an endless loop.
+     */
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        if (requestCode == REQUEST_TURN_DEVICE_LOCATION_ON) {
+            // We don't rely on the result code, but just check the location setting again
+            checkLocationIsOnAndStartGpsTracking(false)
+        }
+    }
+
+    /*
+     *  Uses the Location Client to check the current state of location settings, and gives the user
+     *  the opportunity to turn on location services within our app.
+     */
+    private fun checkLocationIsOnAndStartGpsTracking(resolve:Boolean = true) {
+        val locationRequest = LocationRequest.create().apply {
+            smallestDisplacement = DISPLACEMENT_THRESHOLD
+            priority = LocationRequest.PRIORITY_HIGH_ACCURACY
+        }
+        val builder = LocationSettingsRequest.Builder().addLocationRequest(locationRequest)
+
+        val settingsClient = LocationServices.getSettingsClient(this)
+        val locationSettingsResponseTask =
+            settingsClient.checkLocationSettings(builder.build())
+
+        locationSettingsResponseTask.addOnFailureListener { exception ->
+            if (exception is ResolvableApiException && resolve) {
+                // Location settings are not satisfied, but this can be fixed
+                // by showing the user a dialog.
+                try {
+                    // Show the dialog by calling startResolutionForResult(),
+                    // and check the result in onActivityResult().
+                    exception.startResolutionForResult(this@TrackerActivity,
+                        REQUEST_TURN_DEVICE_LOCATION_ON)
+                } catch (sendEx: IntentSender.SendIntentException) {
+                    Timber.e(sendEx, getString(R.string.resolution_settings_error))
+                }
+            } else {
+                Snackbar.make(
+                    window.decorView.rootView,
+                    R.string.location_required_error,
+                    Snackbar.LENGTH_INDEFINITE
+                ).setAction(R.string.acknowledge) {
+                    checkLocationIsOnAndStartGpsTracking()
+                }.show()
+            }
+        }
+        locationSettingsResponseTask.addOnCompleteListener {
+            if (it.isSuccessful) {
+                startGpsTracking()
+            }
+        }
+    }
+
+    /*
+     *  Determines whether the app has the appropriate permissions across Android 10+ and all other
+     *  Android versions.
+     */
+    @TargetApi(29)
+    private fun isForegroundAndBackgroundLocationPermissionApproved(): Boolean {
+        val foregroundLocationApproved = (
+            ActivityCompat.checkSelfPermission(
+        this, Manifest.permission.ACCESS_FINE_LOCATION
+            ) == PackageManager.PERMISSION_GRANTED
+        )
+
+        // No need to check more if it's Android P or less or false
+        if (!runningQOrLater || !foregroundLocationApproved)
+            return foregroundLocationApproved
+
+        // If Android Q and we have Fine Location check the BG permission too
+        return ActivityCompat.checkSelfPermission(
+        this, Manifest.permission.ACCESS_BACKGROUND_LOCATION
+            ) == PackageManager.PERMISSION_GRANTED
+    }
+
+    /*
+     *  Requests ACCESS_FINE_LOCATION and (on Android 10+ (Q) ACCESS_BACKGROUND_LOCATION).
+     */
+    @TargetApi(29 )
+    private fun requestForegroundAndBackgroundLocationPermissions() {
+        var permissionsArray = arrayOf(Manifest.permission.ACCESS_FINE_LOCATION)
+
+        val resultCode = when {
+            runningQOrLater -> {
+                // this provides the result[BACKGROUND_LOCATION_PERMISSION_INDEX]
+                permissionsArray += Manifest.permission.ACCESS_BACKGROUND_LOCATION
+                REQUEST_FOREGROUND_AND_BACKGROUND_PERMISSION_RESULT_CODE
+            }
+            else -> REQUEST_FOREGROUND_ONLY_PERMISSIONS_REQUEST_CODE
+        }
+
+        Timber.d("Request foreground only location permission")
+        ActivityCompat.requestPermissions(
+            this@TrackerActivity,
+            permissionsArray,
+            resultCode
+        )
     }
 
     // Checks if users have given their location and sets location enabled if so.
     private fun obtainLocationPermissionAndStartTracking() {
-        if (isPermissionGranted()) {
-            startGpsTracking()
+        if (isForegroundAndBackgroundLocationPermissionApproved()) {
+            checkLocationIsOnAndStartGpsTracking()
         } else {
-            ActivityCompat.requestPermissions(
-                this,
-                arrayOf<String>(Manifest.permission.ACCESS_FINE_LOCATION),
-                REQUEST_LOCATION_PERMISSION
-            )
+            requestForegroundAndBackgroundLocationPermissions()
         }
     }
 
     // Callback for the result from requesting permissions.
     // This method is invoked for every call on requestPermissions(android.app.Activity, String[],
     // int).
-    override fun onRequestPermissionsResult(
-        requestCode: Int,
-        permissions: Array<String>,
-        grantResults: IntArray) {
-        // Check if location permissions are granted and if so enable the
-        // location data layer.
-        if (requestCode == REQUEST_LOCATION_PERMISSION) {
-            if (grantResults.contains(PackageManager.PERMISSION_GRANTED)) {
-                obtainLocationPermissionAndStartTracking()
-            }
+    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<String>,
+        grantResults: IntArray)
+    {
+        if (
+            grantResults.isEmpty() ||
+            grantResults[LOCATION_PERMISSION_INDEX] == PackageManager.PERMISSION_DENIED ||
+            (requestCode == REQUEST_FOREGROUND_AND_BACKGROUND_PERMISSION_RESULT_CODE &&
+                    grantResults[BACKGROUND_LOCATION_PERMISSION_INDEX] ==
+                    PackageManager.PERMISSION_DENIED))
+        {
+            // Permission denied.
+            Snackbar.make(
+                window.decorView.rootView,
+                R.string.permission_denied_explanation,
+                Snackbar.LENGTH_INDEFINITE
+            ).setAction(R.string.settings) {
+                // Displays App settings screen.
+                startActivity(Intent().apply {
+                    action = Settings.ACTION_APPLICATION_DETAILS_SETTINGS
+                    data = Uri.fromParts("package", BuildConfig.APPLICATION_ID, null)
+                    flags = Intent.FLAG_ACTIVITY_NEW_TASK
+                })
+            }.show()
+        } else {
+            obtainLocationPermissionAndStartTracking()
         }
     }
 
     private fun getLocationProvider(): String? {
-        val criteria = Criteria()
-        criteria.accuracy = Criteria.ACCURACY_FINE
-        criteria.isSpeedRequired = true
-        criteria.isAltitudeRequired = false
-        criteria.isBearingRequired = false
-        criteria.isCostAllowed = true
-        criteria.powerRequirement = Criteria.POWER_MEDIUM
+        val criteria = Criteria().apply {
+            accuracy = Criteria.ACCURACY_FINE
+            isSpeedRequired = true
+            isAltitudeRequired = false
+            isBearingRequired = false
+            isCostAllowed = true
+            powerRequirement = Criteria.POWER_MEDIUM
+        }
         return locationManager.getBestProvider(criteria, true)
     }
 
@@ -148,11 +352,12 @@ class TrackerActivity : AppCompatActivityWithActionBar(), android.location.Locat
                 else viewModel.lastPeriodInterval.toLong()
     }
 
-    private fun getLocationRequest() {
-        locationRequest = LocationRequest()
-        locationRequest.interval = getRecentPeriodIntervalOrDefault()
-        locationRequest.smallestDisplacement = DISPLACEMENT_THRESHOLD
-        locationRequest.priority = LocationRequest.PRIORITY_HIGH_ACCURACY
+    private fun getLocationRequest(): LocationRequest {
+        return LocationRequest().apply {
+            interval = getRecentPeriodIntervalOrDefault()
+            smallestDisplacement = DISPLACEMENT_THRESHOLD
+            priority = LocationRequest.PRIORITY_HIGH_ACCURACY
+        }
     }
 
     @SuppressLint("MissingPermission")
@@ -176,6 +381,8 @@ class TrackerActivity : AppCompatActivityWithActionBar(), android.location.Locat
     private fun startGpsTracking() {
         batteryManager = getSystemService(BATTERY_SERVICE) as BatteryManager
         // https://appus.software/blog/difference-between-locationmanager-and-google-location-api-services
+        // 0. GeoFencing setup
+        geoFencingClient = LocationServices.getGeofencingClient(this)
         // 1. LocationManager technique
         scheduleLocationUpdates()
 
@@ -195,8 +402,105 @@ class TrackerActivity : AppCompatActivityWithActionBar(), android.location.Locat
     private fun reScheduleLocationUpdates() {
         removeUpdates()
         scheduleLocationUpdates()
-        getLocationRequest()
-        LocationServices.FusedLocationApi.requestLocationUpdates(googleApiClient, locationRequest, this)
+        LocationServices.FusedLocationApi.requestLocationUpdates(googleApiClient, getLocationRequest(), this)
+    }
+
+    /**
+     * Removes geofences. This method should be called after the user has granted the location
+     * permission.
+     */
+    private fun removeGeoFences(reinstateAfter: Boolean = false) {
+        if (!isForegroundAndBackgroundLocationPermissionApproved()) {
+            return
+        }
+        geoFencingClient.removeGeofences(geoFencePendingIntent)?.run {
+            addOnSuccessListener {
+                viewModel.geoFenceIndex = 0
+                // GeoFences removed
+                Timber.d(getString(R.string.geofences_removed))
+                Snackbar.make(
+                    window.decorView.rootView,
+                    getString(R.string.geofences_removed),
+                    Snackbar.LENGTH_SHORT
+                ).show()
+            }
+            addOnFailureListener {
+                // Failed to remove geofences
+                Timber.d(getString(R.string.geofences_not_removed))
+            }
+        }
+    }
+
+    /*
+     * Adds a Geofence for the current clue if needed, and removes any existing Geofence. This
+     * method should be called after the user has granted the location permission.  If there are
+     * no more geofences, we remove the geofence and let the viewmodel know that the ending hint
+     * is now "active."
+     */
+    @SuppressLint("MissingPermission")
+    private fun addNativeGeoFence(lat: Double, lon: Double) {
+        if (viewModel.geoFenceIndex > 0)
+            return
+
+        viewModel.geoFenceIndex = GEO_FENCE_SINGLETON_INDEX
+        // Build the Geofence Object
+        val geofence = Geofence.Builder()
+            // Set the request ID, string to identify the geofence.
+            .setRequestId(GEO_FENCE_SINGLETON_ID)
+            // Set the circular region of this geofence.
+            .setCircularRegion(viewModel.lockLat,
+                viewModel.lockLon,
+                viewModel.lockRadius.toFloat()
+            )
+            // This geofence won't expire until the asset is unlocked
+            .setExpirationDuration(Geofence.NEVER_EXPIRE)
+            // Set the transition types of interest. Alerts are only generated for these
+            // transition. We track entry and exit transitions in this sample.
+            .setTransitionTypes(Geofence.GEOFENCE_TRANSITION_EXIT)
+            .build()
+
+        // Build the geofence request
+        val geofencingRequest = GeofencingRequest.Builder()
+            // The INITIAL_TRIGGER_EXIT flag indicates that geofencing service should trigger a
+            // GEOFENCE_TRANSITION_EXIT notification when the geofence is added and if the device
+            // is already outside that geofence.
+            .setInitialTrigger(GeofencingRequest.INITIAL_TRIGGER_EXIT)
+            // Add the geofences to be monitored by geofencing service.
+            .addGeofence(geofence)
+            .build()
+
+        // First, remove any existing geofences that use our pending intent
+        geoFencingClient.removeGeofences(geoFencePendingIntent)?.run {
+            // Regardless of success/failure of the removal, add the new geofence
+            addOnCompleteListener {
+                // Add the new geofence request with the new geofence
+                geoFencingClient.addGeofences(geofencingRequest, geoFencePendingIntent)?.run {
+                    addOnSuccessListener {
+                        // Geofence added.
+                        Snackbar.make(
+                            window.decorView.rootView,
+                            getString(R.string.geofence_added),
+                            Snackbar.LENGTH_SHORT
+                        ).show()
+                        Timber.d("Added Geofence ${geofence.requestId}")
+                        // Tell the viewmodel that we've reached the end of the game and
+                        // activated the last "geofence" --- by removing the Geofence.
+                        viewModel.geoFenceIndex = GEO_FENCE_SINGLETON_INDEX
+                    }
+                    addOnFailureListener {
+                        // Failed to add geofence.
+                        Snackbar.make(
+                            window.decorView.rootView,
+                            getString(R.string.geofence_not_added),
+                            Snackbar.LENGTH_SHORT
+                        ).show()
+                        if (it.message != null) {
+                            Timber.e(it, getString(R.string.geofence_not_added))
+                        }
+                    }
+                }
+            }
+        }
     }
 
     private fun getBatteryLevel(): Int {
@@ -231,6 +535,7 @@ class TrackerActivity : AppCompatActivityWithActionBar(), android.location.Locat
             // Asset is being locked, waiting for the location of the lock
             if (viewModel.geoFenceLatch) {
                 viewModel.setAssetLockLocation(location.latitude, location.longitude)
+                addNativeGeoFence(location.latitude, location.longitude)
                 viewModel.geoFenceLatch = false
             }
             // Manual geo fence checking
@@ -238,10 +543,7 @@ class TrackerActivity : AppCompatActivityWithActionBar(), android.location.Locat
                 val gpsDistance = haversineGPSDistance(viewModel.lockLat, viewModel.lockLon, location.latitude, location.longitude)
                 // Asset exited the geo-fence
                 if (gpsDistance >= viewModel.lockRadius) {
-                    // Kick in the interval
-                    viewModel.setAssetPeriodInterval(10)
-                    // TODO: this arrives back to the observer and differential will be calculated
-                    // TODO: and reSchedule will be applied if needed (?)
+                    geoFenceExitedHandler(false)
                 }
             }
         }
@@ -263,7 +565,7 @@ class TrackerActivity : AppCompatActivityWithActionBar(), android.location.Locat
     override fun onConnected(extras: Bundle?) {
         // 2.3. Schedule Fused Location updates
         Timber.d("Google Api Client connected")
-        LocationServices.FusedLocationApi.requestLocationUpdates(googleApiClient, locationRequest, this)
+        LocationServices.FusedLocationApi.requestLocationUpdates(googleApiClient, getLocationRequest(), this)
     }
 
     override fun onConnectionSuspended(status: Int) {

@@ -27,6 +27,7 @@ class TrackerViewModel(firestore: FirebaseFirestore, assetId: String) : ViewMode
     var lockRadius = 0
     var lastPeriodInterval = 0
     @Volatile var geoFenceLatch = false
+    var geoFenceIndex = 0
 
     init {
         repository.getAssetChangeObservable()
@@ -40,6 +41,15 @@ class TrackerViewModel(firestore: FirebaseFirestore, assetId: String) : ViewMode
                 }
             )
             .addTo(disposable)
+    }
+
+    fun updateState(asset: Asset) {
+        remoteAssetId = asset.id
+        lastLock = asset.lock
+        lockLat = asset.lockLat
+        lockLon = asset.lockLon
+        lockRadius = asset.lockRadius
+        lastPeriodInterval = asset.periodInterval
     }
 
     fun addReport(lat: Double, lon: Double, speed: Float, battery: Int) {
