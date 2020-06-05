@@ -65,18 +65,10 @@ class TrackerActivity : AppCompatActivityWithActionBar(), android.location.Locat
     private val runningQOrLater =
         android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.Q
 
-    public fun geoFenceExitedHandler(nativeTrigger: Boolean) {
-        // Crank up the interval
-        viewModel.setAssetPeriodInterval(10)
-        // TODO: Send notification to Manager
-        // TODO: this arrives back to the observer and differential will be calculated
-        // TODO: and reSchedule will be applied if needed (?)
-    }
-
     /*
      * Triggered by the Geofence. We'll need to crank up the refresh interval and send notification
      */
-    class GeoFenceBroadcastReceiver : BroadcastReceiver() {
+    inner class GeoFenceBroadcastReceiver : BroadcastReceiver() {
         private fun errorMessage(context: Context, errorCode: Int): String {
             val resources = context.resources
             return when (errorCode) {
@@ -120,7 +112,7 @@ class TrackerActivity : AppCompatActivityWithActionBar(), android.location.Locat
                         return
                     }
 
-                    Companion.geoFenceExitedHandler(true)
+                    geoFenceExitedHandler(true)
                 }
             }
         }
@@ -515,6 +507,14 @@ class TrackerActivity : AppCompatActivityWithActionBar(), android.location.Locat
         val a = latSin * latSin + (cos(lat1 * D2R) * cos(lat2 * D2R) * lonSin * lonSin)
         val c = 2.0 * atan2(sqrt(a), sqrt(1.0 - a))
         return EQATORIAL_EARTH_RADIUS * c
+    }
+
+    private fun geoFenceExitedHandler(nativeTrigger: Boolean) {
+        // Crank up the interval
+        viewModel.setAssetPeriodInterval(10)
+        // TODO: Send notification to Manager
+        // TODO: this arrives back to the observer and differential will be calculated
+        // TODO: and reSchedule will be applied if needed (?)
     }
 
     override fun onLocationChanged(location: Location?) {
