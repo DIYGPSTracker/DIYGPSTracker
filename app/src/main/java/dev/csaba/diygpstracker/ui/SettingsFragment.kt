@@ -9,6 +9,7 @@ import androidx.preference.PreferenceFragmentCompat
 import com.google.android.material.snackbar.Snackbar
 import dev.csaba.diygpstracker.R
 import dev.csaba.diygpstracker.data.hasAuthConfiguration
+import timber.log.Timber
 
 
 class SettingsFragment : PreferenceFragmentCompat() {
@@ -34,8 +35,10 @@ class SettingsFragment : PreferenceFragmentCompat() {
                 Snackbar.make(
                     requireView(),
                     getString(R.string.uncofigured_firestore),
-                    Snackbar.LENGTH_SHORT
-                ).show()
+                    Snackbar.LENGTH_INDEFINITE
+                ).setAction(R.string.acknowledge) {
+                    Timber.d(getString(R.string.uncofigured_firestore))
+                }.show()
             } else {
                 val mainPage = Intent(context, MainActivity::class.java)
                 startActivity(mainPage)
