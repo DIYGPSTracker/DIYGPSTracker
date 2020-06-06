@@ -512,7 +512,7 @@ class TrackerActivity : AppCompatActivityWithActionBar(), android.location.Locat
     private fun geoFenceExitedHandler(nativeTrigger: Boolean) {
         // Crank up the interval
         viewModel.setAssetPeriodInterval(10)
-        // TODO: Send notification to Manager
+        viewModel.sendGeoFencingNotification(nativeTrigger)
         // TODO: this arrives back to the observer and differential will be calculated
         // TODO: and reSchedule will be applied if needed (?)
     }

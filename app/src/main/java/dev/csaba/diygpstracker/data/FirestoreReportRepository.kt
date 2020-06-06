@@ -4,6 +4,7 @@ import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.FirebaseFirestore
 import dev.csaba.diygpstracker.data.remote.mapToAsset
 import dev.csaba.diygpstracker.data.remote.mapToLockLocationUpdate
+import dev.csaba.diygpstracker.data.remote.mapToNotificationData
 import dev.csaba.diygpstracker.data.remote.mapToPeriodIntervalUpdate
 import dev.csaba.diygpstracker.data.remote.mapToReportData
 import dev.csaba.diygpstracker.data.remote.RemoteAsset
@@ -20,6 +21,7 @@ class FirestoreReportRepository(secondaryDB: FirebaseFirestore, assetId: String)
     companion object {
         private const val ASSET_COLLECTION = "Assets"
         private const val REPORT_COLLECTION = "Reports"
+        private const val NOTIFICATION_COLLECTION = "Notifications"
     }
 
     private val remoteDB: FirebaseFirestore = secondaryDB
@@ -88,6 +90,25 @@ class FirestoreReportRepository(secondaryDB: FirebaseFirestore, assetId: String)
                 .document(_assetId)
                 .update(mapToPeriodIntervalUpdate(periodIntervalProgress))
                 .addOnSuccessListener {
+                    if (!emitter.isDisposed) {
+                        emitter.onComplete()
+                    }
+                }
+                .addOnFailureListener {
+                    if (!emitter.isDisposed) {
+                        emitter.onError(it)
+                    }
+                }
+        }
+    }
+
+    override fun sendNotification(notification: Notification): Completable {
+        return Completable.create { emitter ->
+            remoteDB.collection(ASSET_COLLECTION)
+                .document(_assetId).collection(NOTIFICATION_COLLECTION)
+                .add(mapToNotificationData(notification))
+                .addOnSuccessListener {
+                    it.collection(NOTIFICATION_COLLECTION)
                     if (!emitter.isDisposed) {
                         emitter.onComplete()
                     }

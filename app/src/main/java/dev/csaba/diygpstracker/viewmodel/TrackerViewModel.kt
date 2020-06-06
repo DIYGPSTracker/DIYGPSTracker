@@ -10,7 +10,9 @@ import dev.csaba.diygpstracker.addTo
 import dev.csaba.diygpstracker.data.Asset
 import dev.csaba.diygpstracker.data.FirestoreReportRepository
 import dev.csaba.diygpstracker.data.IReportRepository
+import dev.csaba.diygpstracker.data.Notification
 import dev.csaba.diygpstracker.data.Report
+import java.time.LocalDateTime
 
 
 class TrackerViewModel(firestore: FirebaseFirestore, assetId: String) : ViewModel() {
@@ -78,6 +80,24 @@ class TrackerViewModel(firestore: FirebaseFirestore, assetId: String) : ViewMode
 
     fun setAssetPeriodInterval(periodIntervalProgress: Int) {
         repository.setAssetPeriodInterval(periodIntervalProgress)
+            .subscribeOn(Schedulers.io())
+            .subscribe(
+                {},
+                {
+                    it.printStackTrace()
+                })
+            .addTo(disposable)
+    }
+
+    fun sendGeoFencingNotification(native: Boolean) {
+        val title = "Asset $remoteAssetId moved!"
+        val geoFenceType = if (native) "Native" else "Manual"
+        val dateTimeString = LocalDateTime.now()
+        val body = "Asset exited $geoFenceType at $dateTimeString " +
+                "(${lockLat}, ${lockLon} radius ${lockRadius}m)"
+        repository.sendNotification(
+            Notification("${System.currentTimeMillis()}", title, body)
+        )
             .subscribeOn(Schedulers.io())
             .subscribe(
                 {},

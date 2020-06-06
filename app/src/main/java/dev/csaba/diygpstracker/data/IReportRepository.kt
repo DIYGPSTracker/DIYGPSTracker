@@ -12,4 +12,6 @@ interface IReportRepository {
     fun setAssetPeriodInterval(periodIntervalProgress: Int): Completable
 
     fun getAssetChangeObservable(): Observable<Asset>
+
+    fun sendNotification(notification: Notification): Completable
 }

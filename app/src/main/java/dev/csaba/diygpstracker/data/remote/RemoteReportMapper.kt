@@ -1,31 +1,9 @@
 package dev.csaba.diygpstracker.data.remote
 
 import dev.csaba.diygpstracker.data.Report
-import java.util.Date
+import dev.csaba.diygpstracker.data.Notification
 import kotlin.collections.HashMap
 
-
-fun mapToReport(remoteReport: RemoteReport): Report {
-    return Report(
-        remoteReport.id,
-        remoteReport.lat,
-        remoteReport.lon,
-        remoteReport.speed,
-        remoteReport.battery,
-        remoteReport.created.toDate()
-    )
-}
-
-fun mapToRemoteReport(report: Report): RemoteReport {
-    return RemoteReport(
-        report.id,
-        report.lat,
-        report.lon,
-        report.speed,
-        report.battery,
-        mapDateToTimestamp(report.created)
-    )
-}
 
 fun mapToReportData(report: Report): HashMap<String, Any> {
     return hashMapOf(
@@ -37,10 +15,11 @@ fun mapToReportData(report: Report): HashMap<String, Any> {
     )
 }
 
-fun mapToLockLocation(report: Report): HashMap<String, Any> {
+fun mapToNotificationData(notification: Notification): HashMap<String, Any> {
     return hashMapOf(
-        "lockLat" to report.lat,
-        "lockLon" to report.lon,
-        "updated" to mapDateToTimestamp(Date())
+        "id" to notification.id,
+        "title" to notification.title,
+        "body" to notification.body,
+        "created" to mapDateToTimestamp(notification.created)
     )
 }
