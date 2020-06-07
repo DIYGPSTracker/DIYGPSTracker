@@ -3,10 +3,9 @@ package dev.csaba.diygpstracker.data
 import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.FirebaseFirestore
 import dev.csaba.diygpstracker.data.remote.mapToAsset
-import dev.csaba.diygpstracker.data.remote.mapToLockAlertUpdate
+import dev.csaba.diygpstracker.data.remote.mapToGeoFenceExitedUpdate
 import dev.csaba.diygpstracker.data.remote.mapToLockLocationUpdate
 import dev.csaba.diygpstracker.data.remote.mapToNotificationData
-import dev.csaba.diygpstracker.data.remote.mapToPeriodIntervalUpdate
 import dev.csaba.diygpstracker.data.remote.mapToReportData
 import dev.csaba.diygpstracker.data.remote.RemoteAsset
 import io.reactivex.Completable
@@ -85,29 +84,11 @@ class FirestoreReportRepository(secondaryDB: FirebaseFirestore, assetId: String)
         }
     }
 
-    override fun setAssetPeriodInterval(periodIntervalProgress: Int): Completable {
+    override fun setAssetPeriodIntervalAndLockAlert(periodInterval: Int, lockAlert: Boolean): Completable {
         return Completable.create { emitter ->
             remoteDB.collection(ASSET_COLLECTION)
                 .document(_assetId)
-                .update(mapToPeriodIntervalUpdate(periodIntervalProgress))
-                .addOnSuccessListener {
-                    if (!emitter.isDisposed) {
-                        emitter.onComplete()
-                    }
-                }
-                .addOnFailureListener {
-                    if (!emitter.isDisposed) {
-                        emitter.onError(it)
-                    }
-                }
-        }
-    }
-
-    override fun setAssetLockAlert(alert: Boolean): Completable {
-        return Completable.create { emitter ->
-            remoteDB.collection(ASSET_COLLECTION)
-                .document(_assetId)
-                .update(mapToLockAlertUpdate(alert))
+                .update(mapToGeoFenceExitedUpdate(periodInterval, lockAlert))
                 .addOnSuccessListener {
                     if (!emitter.isDisposed) {
                         emitter.onComplete()

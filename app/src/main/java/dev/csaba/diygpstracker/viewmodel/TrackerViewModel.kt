@@ -78,8 +78,9 @@ class TrackerViewModel(firestore: FirebaseFirestore, assetId: String) : ViewMode
             .addTo(disposable)
     }
 
-    fun setAssetPeriodInterval(periodIntervalProgress: Int) {
-        repository.setAssetPeriodInterval(periodIntervalProgress)
+    fun handleGeoFenceExited(periodInterval: Int, alert: Boolean, native: Boolean) {
+        // Crank the interval down and trigger the alert
+        repository.setAssetPeriodIntervalAndLockAlert(periodInterval, alert)
             .subscribeOn(Schedulers.io())
             .subscribe(
                 {},
@@ -87,20 +88,8 @@ class TrackerViewModel(firestore: FirebaseFirestore, assetId: String) : ViewMode
                     it.printStackTrace()
                 })
             .addTo(disposable)
-    }
 
-    fun setAssetLockAlert(alert: Boolean) {
-        repository.setAssetLockAlert(alert)
-            .subscribeOn(Schedulers.io())
-            .subscribe(
-                {},
-                {
-                    it.printStackTrace()
-                })
-            .addTo(disposable)
-    }
-
-    fun sendGeoFencingNotification(native: Boolean) {
+        // Record notification (will be picked up by Cloud Function for FCM)
         val title = "Asset $remoteAssetId moved!"
         val geoFenceType = if (native) "Native" else "Manual"
         val dateTimeString = LocalDateTime.now()

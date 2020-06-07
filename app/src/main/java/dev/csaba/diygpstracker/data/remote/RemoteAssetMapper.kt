@@ -36,20 +36,14 @@ fun mapPeriodIntervalToProgress(periodInterval: Int): Int {
     return intervals.size - 1
 }
 
-fun mapPeriodIntervalProgressToSeconds(periodIntervalProgress: Int): Int {
+fun mapPeriodIntervalToSeconds(periodInterval: Int): Int {
     val intervals = intArrayOf(0, 10, 60, 600, 3600, 86400)
-    return mapValueToInterval(intervals, periodIntervalProgress)
+    return mapValueToInterval(intervals, periodInterval)
 }
 
-fun mapToPeriodIntervalUpdate(periodIntervalProgress: Int): HashMap<String, Any> {
+fun mapToGeoFenceExitedUpdate(periodInterval: Int, alert: Boolean): HashMap<String, Any> {
     return hashMapOf(
-        "periodInterval" to mapPeriodIntervalProgressToSeconds(periodIntervalProgress),
-        "updated" to mapDateToTimestamp(Date())
-    )
-}
-
-fun mapToLockAlertUpdate(alert: Boolean): HashMap<String, Any> {
-    return hashMapOf(
+        "periodInterval" to mapPeriodIntervalToSeconds(periodInterval),
         "lockAlert" to alert,
         "updated" to mapDateToTimestamp(Date())
     )
