@@ -36,7 +36,7 @@ class TrackerViewModel(firestore: FirebaseFirestore, assetId: String) : ViewMode
             .observeOn(AndroidSchedulers.mainThread())
             .subscribe (
                 {
-                    asset = MutableLiveData(it)
+                    asset.value = it
                 },
                 {
                     it.printStackTrace()
