@@ -78,9 +78,9 @@ class TrackerViewModel(firestore: FirebaseFirestore, assetId: String) : ViewMode
             .addTo(disposable)
     }
 
-    fun handleGeoFenceExited(periodInterval: Int, alert: Boolean, native: Boolean) {
+    fun handleGeoFenceExited(periodInterval: Int, lockAlert: Boolean, native: Boolean) {
         // Crank the interval down and trigger the alert
-        repository.setAssetPeriodIntervalAndLockAlert(periodInterval, alert)
+        repository.setAssetPeriodIntervalAndLockAlert(periodInterval, lockAlert)
             .subscribeOn(Schedulers.io())
             .subscribe(
                 {},
