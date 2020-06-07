@@ -41,7 +41,7 @@ class TrackerActivity : AppCompatActivityWithActionBar(), android.location.Locat
     companion object {
         private const val GPS_UPDATE_TIME_MS = 10000
         private const val DISPLACEMENT_THRESHOLD = 1.0f
-        private const val EQATORIAL_EARTH_RADIUS = 6378.1370
+        private const val EQATORIAL_EARTH_RADIUS = 6.3781370  // in m and not km
         private const val D2R = Math.PI / 180.0
 
         private const val REQUEST_FOREGROUND_AND_BACKGROUND_PERMISSION_RESULT_CODE = 33
