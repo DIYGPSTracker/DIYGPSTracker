@@ -89,6 +89,17 @@ class TrackerViewModel(firestore: FirebaseFirestore, assetId: String) : ViewMode
             .addTo(disposable)
     }
 
+    fun setAssetLockAlert(alert: Boolean) {
+        repository.setAssetLockAlert(alert)
+            .subscribeOn(Schedulers.io())
+            .subscribe(
+                {},
+                {
+                    it.printStackTrace()
+                })
+            .addTo(disposable)
+    }
+
     fun sendGeoFencingNotification(native: Boolean) {
         val title = "Asset $remoteAssetId moved!"
         val geoFenceType = if (native) "Native" else "Manual"
