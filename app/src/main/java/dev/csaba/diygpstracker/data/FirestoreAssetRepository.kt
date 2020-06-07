@@ -64,7 +64,8 @@ class FirestoreAssetRepository(secondaryDB: FirebaseFirestore) : IAssetRepositor
             .toList()
     }
 
-    private fun mapDocumentToRemoteAsset(document: DocumentSnapshot) = document.toObject(RemoteAsset::class.java)!!.apply { id = document.id }
+    private fun mapDocumentToRemoteAsset(document: DocumentSnapshot) =
+        document.toObject(RemoteAsset::class.java)!!.apply { id = document.id }
 
     override fun getChangeObservable(): Observable<List<Asset>> =
         changeObservable.hide()

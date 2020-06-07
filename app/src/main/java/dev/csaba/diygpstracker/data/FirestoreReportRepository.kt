@@ -121,7 +121,8 @@ class FirestoreReportRepository(secondaryDB: FirebaseFirestore, assetId: String)
         }
     }
 
-    private fun mapDocumentToRemoteAsset(document: DocumentSnapshot) = document.toObject(RemoteAsset::class.java)!!.apply { id = document.id }
+    private fun mapDocumentToRemoteAsset(document: DocumentSnapshot) =
+        document.toObject(RemoteAsset::class.java)!!.apply { id = document.id }
 
     override fun getAssetChangeObservable(): Observable<Asset> =
         changeObservable.hide()
