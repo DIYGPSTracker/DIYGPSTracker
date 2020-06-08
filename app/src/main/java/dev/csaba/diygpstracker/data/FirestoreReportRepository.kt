@@ -84,11 +84,12 @@ class FirestoreReportRepository(secondaryDB: FirebaseFirestore, assetId: String)
         }
     }
 
-    override fun setAssetPeriodIntervalAndLockAlert(periodInterval: Int, lockAlert: Boolean): Completable {
+    override fun setAssetPeriodIntervalAndLockAlert(periodInterval: Int, lockAlert: Boolean,
+                                                    native: Boolean): Completable {
         return Completable.create { emitter ->
             remoteDB.collection(ASSET_COLLECTION)
                 .document(_assetId)
-                .update(mapToGeoFenceExitedUpdate(periodInterval, lockAlert))
+                .update(mapToGeoFenceExitedUpdate(periodInterval, lockAlert, native))
                 .addOnSuccessListener {
                     if (!emitter.isDisposed) {
                         emitter.onComplete()

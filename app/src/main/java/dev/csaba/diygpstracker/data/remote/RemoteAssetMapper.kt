@@ -2,7 +2,6 @@ package dev.csaba.diygpstracker.data.remote
 
 import com.google.firebase.Timestamp
 import dev.csaba.diygpstracker.data.Asset
-import dev.csaba.diygpstracker.data.mapValueToInterval
 import java.util.Date
 
 
@@ -15,6 +14,7 @@ fun mapToAsset(remoteAsset: RemoteAsset): Asset {
         remoteAsset.lockLon,
         remoteAsset.lockRadius,
         remoteAsset.lockAlert,
+        remoteAsset.lockManualAlert,
         remoteAsset.periodInterval,
         remoteAsset.created.toDate(),
         remoteAsset.updated.toDate()
@@ -36,12 +36,17 @@ fun mapPeriodIntervalToProgress(periodInterval: Int): Int {
     return intervals.size - 1
 }
 
-fun mapToGeoFenceExitedUpdate(periodInterval: Int, alert: Boolean): HashMap<String, Any> {
-    return hashMapOf(
+fun mapToGeoFenceExitedUpdate(periodInterval: Int, alert: Boolean, native: Boolean): HashMap<String, Any> {
+    val updateMap: HashMap<String, Any> = hashMapOf(
         "periodInterval" to periodInterval,
         "lockAlert" to alert,
         "updated" to mapDateToTimestamp(Date())
     )
+    if (native) {
+        updateMap["lockManualAlert"] = true
+    }
+
+    return updateMap
 }
 
 fun mapToLockLocationUpdate(lat: Double, lon: Double): HashMap<String, Any> {

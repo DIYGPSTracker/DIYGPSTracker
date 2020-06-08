@@ -9,7 +9,8 @@ interface IReportRepository {
 
     fun setAssetLockLocation(lat: Double, lon: Double): Completable
 
-    fun setAssetPeriodIntervalAndLockAlert(periodInterval: Int, lockAlert: Boolean): Completable
+    fun setAssetPeriodIntervalAndLockAlert(periodInterval: Int, lockAlert: Boolean,
+                                           native: Boolean): Completable
 
     fun getAssetChangeObservable(): Observable<Asset>
 

@@ -537,8 +537,11 @@ class TrackerActivity : AppCompatActivityWithActionBar(), android.location.Locat
                 viewModel.geoFenceLatch = false
             }
             // Manual geo fence checking
-            if (viewModel.lastLock && abs(viewModel.lockLat) > 1e-6 && abs(viewModel.lockLon) > 1e-6) {
-                val gpsDistance = haversineGPSDistance(viewModel.lockLat, viewModel.lockLon, location.latitude, location.longitude)
+            if (viewModel.lastLock && !viewModel.lockManualAlert &&
+                abs(viewModel.lockLat) > 1e-6 && abs(viewModel.lockLon) > 1e-6)
+            {
+                val gpsDistance = haversineGPSDistance(viewModel.lockLat, viewModel.lockLon,
+                    location.latitude, location.longitude)
                 // Asset exited the geo-fence
                 if (gpsDistance >= viewModel.lockRadius) {
                     geoFenceExitedHandler(false)

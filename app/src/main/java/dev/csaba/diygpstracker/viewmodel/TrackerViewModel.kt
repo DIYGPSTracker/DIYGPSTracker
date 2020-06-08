@@ -27,6 +27,8 @@ class TrackerViewModel(firestore: FirebaseFirestore, assetId: String) : ViewMode
     var lockLat = .0
     var lockLon = .0
     var lockRadius = 0
+    var lockALert = false
+    var lockManualAlert = false
     var lastPeriodInterval = 0
     @Volatile var geoFenceLatch = false
     var geoFenceIndex = 0
@@ -51,6 +53,8 @@ class TrackerViewModel(firestore: FirebaseFirestore, assetId: String) : ViewMode
         lockLat = asset.lockLat
         lockLon = asset.lockLon
         lockRadius = asset.lockRadius
+        lockALert = asset.lockAlert
+        lockManualAlert = asset.lockManualAlert
         lastPeriodInterval = asset.periodInterval
     }
 
@@ -80,7 +84,7 @@ class TrackerViewModel(firestore: FirebaseFirestore, assetId: String) : ViewMode
 
     fun handleGeoFenceExited(periodInterval: Int, lockAlert: Boolean, native: Boolean) {
         // Crank the interval down and trigger the alert
-        repository.setAssetPeriodIntervalAndLockAlert(periodInterval, lockAlert)
+        repository.setAssetPeriodIntervalAndLockAlert(periodInterval, lockAlert, native)
             .subscribeOn(Schedulers.io())
             .subscribe(
                 {},
