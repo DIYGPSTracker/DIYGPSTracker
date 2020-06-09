@@ -25,7 +25,7 @@
     <string name="connect">&#xbb;Connect&#xab;</string>
     <string name="connect_help">Click connect to continue</string>
     <string name="home_page_url">https://diygpstracker.github.io/</string>
-    <string name="privacy_policy_url">https://diygpstracker.github.io/privacypolicy</string>
+    <string name="privacy_policy_url">https://diygpstracker.github.io/privacy/</string>
     <string name="authentication_failed">Authentication failed.</string>
     <string name="uncofigured_firestore">Firestore not configured. Please specify Project ID, Application ID, and API Key then connect.</string>
     <string name="asset_button_title">Asset List</string>
