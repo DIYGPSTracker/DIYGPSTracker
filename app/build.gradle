@@ -67,10 +67,10 @@ dependencies {
     implementation "com.google.android.gms:play-services-location:17.0.0"
     implementation "com.google.android.gms:play-services-auth:18.0.0"
     implementation "com.google.android.material:material:1.1.0"
-    implementation "com.google.firebase:firebase-auth:19.3.1"
+    implementation "com.google.firebase:firebase-auth:19.3.2"
     implementation "com.google.firebase:firebase-common-ktx:19.3.0"
-    implementation "com.google.firebase:firebase-database-ktx:19.3.0"
-    implementation "com.google.firebase:firebase-firestore-ktx:21.4.3"
+    implementation "com.google.firebase:firebase-database-ktx:19.3.1"
+    implementation "com.google.firebase:firebase-firestore-ktx:21.5.0"
 
     implementation "com.jakewharton.timber:timber:4.7.1"
 
