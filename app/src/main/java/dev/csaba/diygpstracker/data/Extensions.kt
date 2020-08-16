@@ -1,11 +1,10 @@
 package dev.csaba.diygpstracker.data
 
-import android.content.SharedPreferences
 import androidx.fragment.app.FragmentActivity
-import androidx.preference.PreferenceManager
+import dev.csaba.diygpstracker.data.EncryptedPreferenceDataStore
 
 
-fun getPreferenceString(preferences: SharedPreferences, name: String, defValue: String = ""): String {
+fun getPreferenceString(preferences: EncryptedPreferenceDataStore, name: String, defValue: String = ""): String {
     return preferences.getString(name, defValue) ?: return ""
 }
 
@@ -20,7 +19,7 @@ fun mapValueToInterval(intervals: IntArray, value: Int): Int {
 }
 
 fun FragmentActivity.getSecondaryFirebaseConfiguration(): FirebaseProjectConfiguration {
-    val preferences = PreferenceManager.getDefaultSharedPreferences(applicationContext)
+    val preferences = EncryptedPreferenceDataStore.getInstance(applicationContext)
     return FirebaseProjectConfiguration(
         getPreferenceString(preferences, "project_id"),
         getPreferenceString(preferences, "application_id"),
@@ -41,11 +40,11 @@ fun FragmentActivity.hasAuthConfiguration(): Boolean {
 }
 
 fun FragmentActivity.getAssetId(): String {
-    val preferences = PreferenceManager.getDefaultSharedPreferences(applicationContext)
+    val preferences = EncryptedPreferenceDataStore.getInstance(applicationContext)
     return getPreferenceString(preferences, "asset_id")
 }
 
 fun FragmentActivity.setAssetId(assetId: String) {
-    val preferences = PreferenceManager.getDefaultSharedPreferences(applicationContext)
-    preferences.edit().putString("asset_id", assetId).apply()
+    val preferences = EncryptedPreferenceDataStore.getInstance(applicationContext)
+    preferences.putString("asset_id", assetId)
 }
