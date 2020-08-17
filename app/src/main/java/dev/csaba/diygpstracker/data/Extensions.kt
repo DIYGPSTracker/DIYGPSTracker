@@ -1,7 +1,6 @@
 package dev.csaba.diygpstracker.data
 
 import androidx.fragment.app.FragmentActivity
-import dev.csaba.diygpstracker.data.EncryptedPreferenceDataStore
 
 
 fun getPreferenceString(preferences: EncryptedPreferenceDataStore, name: String, defValue: String = ""): String {
