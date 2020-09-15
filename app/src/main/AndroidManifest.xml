@@ -25,7 +25,12 @@
             </intent-filter>
         </activity>
 
-        <activity android:name=".ui.SettingsActivity" />
+        <activity android:name=".ui.SettingsActivity">
+            <intent-filter>
+                <action android:name="android.provider.Settings.ACTION_LOCATION_SOURCE_SETTINGS" />
+                <category android:name="android.intent.category.PREFERENCE" />
+            </intent-filter>
+        </activity>
         <activity android:name=".ui.MainActivity" />
         <activity android:name=".ui.TrackerActivity" />
 
