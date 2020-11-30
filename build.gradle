@@ -21,7 +21,7 @@ buildscript {
     versions.compileSdk = 29
     versions.minSdk = 26
     versions.targetSdk = 29
-    versions.kotlin = "1.4.0"
+    versions.kotlin = "1.4.10"
 
     repositories {
         google()
@@ -30,7 +30,7 @@ buildscript {
     dependencies {
         classpath 'com.android.tools.build:gradle:4.1.1'
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$versions.kotlin"
-        classpath "com.google.gms:google-services:4.3.3"
+        classpath "com.google.gms:google-services:4.3.4"
     }
 }
 
