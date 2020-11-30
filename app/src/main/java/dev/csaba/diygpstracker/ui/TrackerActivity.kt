@@ -192,7 +192,7 @@ class TrackerActivity : AppCompatActivityWithActionBar(), android.location.Locat
      *  Uses the Location Client to check the current state of location settings, and gives the user
      *  the opportunity to turn on location services within our app.
      */
-    private fun checkLocationIsOnAndStartGpsTracking(resolve:Boolean = true) {
+    private fun checkLocationIsOnAndStartGpsTracking(resolve: Boolean = true) {
         val locationRequest = LocationRequest.create().apply {
             smallestDisplacement = DISPLACEMENT_THRESHOLD
             priority = LocationRequest.PRIORITY_HIGH_ACCURACY
@@ -210,8 +210,10 @@ class TrackerActivity : AppCompatActivityWithActionBar(), android.location.Locat
                 try {
                     // Show the dialog by calling startResolutionForResult(),
                     // and check the result in onActivityResult().
-                    exception.startResolutionForResult(this@TrackerActivity,
-                        REQUEST_TURN_DEVICE_LOCATION_ON)
+                    exception.startResolutionForResult(
+                        this@TrackerActivity,
+                        REQUEST_TURN_DEVICE_LOCATION_ON
+                    )
                 } catch (sendEx: IntentSender.SendIntentException) {
                     Timber.e(sendEx, getString(R.string.resolution_settings_error))
                 }
@@ -240,7 +242,7 @@ class TrackerActivity : AppCompatActivityWithActionBar(), android.location.Locat
     private fun isForegroundAndBackgroundLocationPermissionApproved(): Boolean {
         val foregroundLocationApproved = (
             ActivityCompat.checkSelfPermission(
-        this, Manifest.permission.ACCESS_FINE_LOCATION
+                this, Manifest.permission.ACCESS_FINE_LOCATION
             ) == PackageManager.PERMISSION_GRANTED
         )
 
@@ -250,14 +252,14 @@ class TrackerActivity : AppCompatActivityWithActionBar(), android.location.Locat
 
         // If Android Q and we have Fine Location check the BG permission too
         return ActivityCompat.checkSelfPermission(
-        this, Manifest.permission.ACCESS_BACKGROUND_LOCATION
-            ) == PackageManager.PERMISSION_GRANTED
+            this, Manifest.permission.ACCESS_BACKGROUND_LOCATION
+        ) == PackageManager.PERMISSION_GRANTED
     }
 
     /*
      *  Requests ACCESS_FINE_LOCATION and (on Android 10+ (Q) ACCESS_BACKGROUND_LOCATION).
      */
-    @TargetApi(29 )
+    @TargetApi(29)
     private fun requestForegroundAndBackgroundLocationPermissions() {
         var permissionsArray = arrayOf(Manifest.permission.ACCESS_FINE_LOCATION)
 
@@ -397,7 +399,11 @@ class TrackerActivity : AppCompatActivityWithActionBar(), android.location.Locat
     private fun reScheduleLocationUpdates() {
         removeUpdates()
         scheduleLocationUpdates()
-        LocationServices.FusedLocationApi.requestLocationUpdates(googleApiClient, getLocationRequest(), this)
+        LocationServices.FusedLocationApi.requestLocationUpdates(
+            googleApiClient,
+            getLocationRequest(),
+            this
+        )
     }
 
     /**
@@ -443,7 +449,8 @@ class TrackerActivity : AppCompatActivityWithActionBar(), android.location.Locat
             // Set the request ID, string to identify the geofence.
             .setRequestId(GEO_FENCE_SINGLETON_ID)
             // Set the circular region of this geofence.
-            .setCircularRegion(viewModel.lockLat,
+            .setCircularRegion(
+                viewModel.lockLat,
                 viewModel.lockLon,
                 viewModel.lockRadius.toFloat()
             )
@@ -543,8 +550,10 @@ class TrackerActivity : AppCompatActivityWithActionBar(), android.location.Locat
             if (viewModel.lastLock && !viewModel.lockManualAlert &&
                 abs(viewModel.lockLat) > 1e-6 && abs(viewModel.lockLon) > 1e-6)
             {
-                val gpsDistance = haversineGPSDistance(viewModel.lockLat, viewModel.lockLon,
-                    location.latitude, location.longitude)
+                val gpsDistance = haversineGPSDistance(
+                    viewModel.lockLat, viewModel.lockLon,
+                    location.latitude, location.longitude
+                )
                 // Asset exited the geo-fence
                 if (gpsDistance >= viewModel.lockRadius) {
                     geoFenceExitedHandler(false)
@@ -569,7 +578,11 @@ class TrackerActivity : AppCompatActivityWithActionBar(), android.location.Locat
     override fun onConnected(extras: Bundle?) {
         // 2.3. Schedule Fused Location updates
         Timber.d("Google Api Client connected")
-        LocationServices.FusedLocationApi.requestLocationUpdates(googleApiClient, getLocationRequest(), this)
+        LocationServices.FusedLocationApi.requestLocationUpdates(
+            googleApiClient,
+            getLocationRequest(),
+            this
+        )
     }
 
     override fun onConnectionSuspended(status: Int) {
