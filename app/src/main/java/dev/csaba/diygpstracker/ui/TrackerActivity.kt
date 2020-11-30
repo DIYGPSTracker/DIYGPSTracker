@@ -290,9 +290,12 @@ class TrackerActivity : AppCompatActivityWithActionBar(), android.location.Locat
     // Callback for the result from requesting permissions.
     // This method is invoked for every call on requestPermissions(android.app.Activity, String[],
     // int).
-    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<String>,
-        grantResults: IntArray)
+    override fun onRequestPermissionsResult(
+        requestCode: Int, permissions: Array<String>,
+        grantResults: IntArray
+    )
     {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
         if (
             grantResults.isEmpty() ||
             grantResults[LOCATION_PERMISSION_INDEX] == PackageManager.PERMISSION_DENIED ||
