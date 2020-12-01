@@ -2,6 +2,7 @@ package dev.csaba.diygpstracker.data
 
 import java.util.Date
 
+
 data class Asset(
     var id: String = "",
     var title: String = "",

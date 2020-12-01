@@ -2,6 +2,7 @@ package dev.csaba.diygpstracker.data
 
 import java.util.Date
 
+
 data class Report(
     var id: String = "",
     var lat: Double = .0,

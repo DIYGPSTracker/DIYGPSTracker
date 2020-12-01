@@ -9,6 +9,7 @@ import dev.csaba.diygpstracker.R
 import dev.csaba.diygpstracker.data.hasAuthConfiguration
 import timber.log.Timber
 
+
 abstract class AppCompatActivityWithActionBar : AppCompatActivity() {
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
