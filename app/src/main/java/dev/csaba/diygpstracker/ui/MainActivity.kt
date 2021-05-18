@@ -3,7 +3,6 @@ package dev.csaba.diygpstracker.ui
 import android.content.Intent
 import android.os.Bundle
 import androidx.appcompat.app.AlertDialog
-import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.gms.auth.api.signin.GoogleSignIn
@@ -191,7 +190,7 @@ class MainActivity : AppCompatActivityWithActionBar(), OnAssetInputListener {
     private fun populateViewModel(firestore: FirebaseFirestore) {
         viewModel = MainViewModel(firestore)
 
-        viewModel.assetList.observe(this, Observer {
+        viewModel.assetList.observe(this, {
             assetAdapter.setItems(it)
         })
     }
