@@ -28,10 +28,10 @@ abstract class AppCompatActivityWithActionBar : AppCompatActivity() {
             if (!this.hasAuthConfiguration()) {
                 Snackbar.make(
                     window.decorView.rootView,
-                    getString(R.string.uncofigured_firestore),
+                    getString(R.string.unconfigured_firestore),
                     Snackbar.LENGTH_INDEFINITE
                 ).setAction(R.string.acknowledge) {
-                    Timber.d(getString(R.string.uncofigured_firestore))
+                    Timber.d(getString(R.string.unconfigured_firestore))
                 }.show()
             } else {
                 val intent = Intent(this, MainActivity::class.java)

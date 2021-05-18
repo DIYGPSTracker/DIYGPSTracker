@@ -27,7 +27,7 @@
     <string name="home_page_url">https://diygpstracker.github.io/</string>
     <string name="privacy_policy_url">https://diygpstracker.github.io/privacy/</string>
     <string name="authentication_failed">Authentication failed.</string>
-    <string name="uncofigured_firestore">Firestore not configured. Please specify Project ID, Application ID, and API Key then connect.</string>
+    <string name="unconfigured_firestore">Firestore not configured. Please specify Project ID, Application ID, and API Key then connect.</string>
     <string name="asset_button_title">Asset List</string>
     <string name="tracking_help">See LocationManager or FusedLocationAPI info below:</string>
     <string name="time_stamp">Time stamp</string>
@@ -45,7 +45,7 @@
     <string name="unknown_geofence_error">Unknown error: the Geofence service is not available now</string>
     <string name="location_required_error">Location services must be enabled for this game.</string>
 
-    <!--    Geofence Status Strings-->
+    <!-- Geofence Status Strings -->
     <string name="geofence_added">Geofence added.</string>
     <string name="geofences_removed">Geofences removed.</string>
     <string name="geofence_exited">Geofence exited.</string>
