@@ -37,10 +37,10 @@ class SettingsFragment : PreferenceFragmentCompat() {
             if (!requireActivity().hasAuthConfiguration()) {
                 Snackbar.make(
                     requireView(),
-                    getString(R.string.uncofigured_firestore),
+                    getString(R.string.unconfigured_firestore),
                     Snackbar.LENGTH_INDEFINITE
                 ).setAction(R.string.acknowledge) {
-                    Timber.d(getString(R.string.uncofigured_firestore))
+                    Timber.d(getString(R.string.unconfigured_firestore))
                 }.show()
             } else {
                 val mainPage = Intent(context, MainActivity::class.java)
