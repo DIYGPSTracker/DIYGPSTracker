@@ -2,6 +2,7 @@ package dev.csaba.diygpstracker.ui
 
 import android.content.Intent
 import android.os.Bundle
+import androidx.appcompat.app.AlertDialog
 import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -133,6 +134,17 @@ class MainActivity : AppCompatActivityWithActionBar(), OnAssetInputListener {
         } else {
             populateViewModel(appSingleton.firestore!!)
         }
+
+        showBgLocationWarning()
+    }
+
+    private fun showBgLocationWarning() {
+        val builder = AlertDialog.Builder(this, R.style.WarningDialogStyle)
+        val arWarning = resources.getString(R.string.bg_location_warning)
+        val title = resources.getString(R.string.bg_location_warning_title)
+        builder.setMessage(arWarning).setTitle(title).setPositiveButton("OK", null)
+        val dialog = builder.create()
+        dialog.show()
     }
 
     public override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
