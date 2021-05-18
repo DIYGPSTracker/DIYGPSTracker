@@ -7,13 +7,25 @@
     tools:context=".ui.StagingActivity">
 
     <com.google.android.material.textview.MaterialTextView
+        android:id="@+id/bgLocationPermissionWarning"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_margin="10dp"
+        android:textAlignment="center"
+        android:textSize="24sp"
+        android:textColor="@color/design_default_color_error"
+        android:textStyle="italic"
+        app:layout_constraintTop_toTopOf="parent"
+        android:text="@string/bg_location_warning" />
+
+    <com.google.android.material.textview.MaterialTextView
         android:id="@+id/settingsHelp"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_margin="10dp"
         android:textAlignment="center"
         android:textSize="24sp"
-        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/bgLocationPermissionWarning"
         android:text="@string/settings_help" />
 
     <com.google.android.material.button.MaterialButton
