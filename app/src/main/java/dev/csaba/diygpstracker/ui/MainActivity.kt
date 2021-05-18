@@ -138,7 +138,7 @@ class MainActivity : AppCompatActivityWithActionBar(), OnAssetInputListener {
     }
 
     private fun showBgLocationWarning() {
-        val builder = AlertDialog.Builder(this, R.style.WarningDialogStyle)
+        val builder = AlertDialog.Builder(this)
         val arWarning = resources.getString(R.string.bg_location_warning)
         val title = resources.getString(R.string.bg_location_warning_title)
         builder.setMessage(arWarning).setTitle(title).setPositiveButton("OK", null)
