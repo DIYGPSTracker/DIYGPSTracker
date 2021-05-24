@@ -133,17 +133,6 @@ class MainActivity : AppCompatActivityWithActionBar(), OnAssetInputListener {
         } else {
             populateViewModel(appSingleton.firestore!!)
         }
-
-        showBgLocationWarning()
-    }
-
-    private fun showBgLocationWarning() {
-        val builder = AlertDialog.Builder(this)
-        val arWarning = resources.getString(R.string.bg_location_warning)
-        val title = resources.getString(R.string.bg_location_warning_title)
-        builder.setMessage(arWarning).setTitle(title).setPositiveButton("OK", null)
-        val dialog = builder.create()
-        dialog.show()
     }
 
     public override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {

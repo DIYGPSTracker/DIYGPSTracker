@@ -18,6 +18,7 @@ import android.os.Bundle
 import android.provider.Settings
 import android.view.View
 import android.widget.TextView
+import androidx.appcompat.app.AlertDialog
 import androidx.core.app.ActivityCompat
 import androidx.lifecycle.Observer
 import com.google.android.gms.common.ConnectionResult
@@ -234,6 +235,15 @@ class TrackerActivity : AppCompatActivityWithActionBar(), android.location.Locat
         }
     }
 
+    private fun showBgLocationWarning() {
+        val builder = AlertDialog.Builder(this)
+        val arWarning = resources.getString(R.string.bg_location_warning)
+        val title = resources.getString(R.string.bg_location_warning_title)
+        builder.setMessage(arWarning).setTitle(title).setPositiveButton("OK", null)
+        val dialog = builder.create()
+        dialog.show()
+    }
+
     /*
      *  Determines whether the app has the appropriate permissions across Android 10+ and all other
      *  Android versions.
@@ -265,6 +275,7 @@ class TrackerActivity : AppCompatActivityWithActionBar(), android.location.Locat
 
         val resultCode = when {
             runningQOrLater -> {
+                showBgLocationWarning()
                 // this provides the result[BACKGROUND_LOCATION_PERMISSION_INDEX]
                 permissionsArray += Manifest.permission.ACCESS_BACKGROUND_LOCATION
                 REQUEST_FOREGROUND_AND_BACKGROUND_PERMISSION_RESULT_CODE
