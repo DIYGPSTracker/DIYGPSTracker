@@ -61,5 +61,5 @@
 
     <!-- Background Location permission Strings -->
     <string name="bg_location_warning_title">Information</string>
-    <string name="bg_location_warning">DIY GPS Tracker requires background location for tracking your protected assets and provisioning geo fences even when in the background. Location information is *ONLY PERSISTED INTO YOUR OWN* managed Firestore.</string>
+    <string name="bg_location_warning">This app collects location data to make GPS tracking of your assets possible even when the app is closed or not in use. Location information is *ONLY PERSISTED INTO YOUR OWN* managed Firestore.</string>
 </resources>
