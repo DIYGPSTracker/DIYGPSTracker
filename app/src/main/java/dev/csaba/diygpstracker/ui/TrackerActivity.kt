@@ -136,7 +136,7 @@ class TrackerActivity : AppCompatActivityWithActionBar(), android.location.Locat
         val assetId = intent.getStringExtra("assetId")
         if (assetId != null && appSingleton.firestore != null) {
             viewModel = TrackerViewModel(appSingleton.firestore!!, assetId)
-            viewModel.asset.observe(this, Observer {
+            viewModel.asset.observe(this, {
                 if (!gotFirstObserve) {
                     gotFirstObserve = true
                     if (BuildConfig.DEBUG && assetId != it.id) {
