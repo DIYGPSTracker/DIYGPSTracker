@@ -20,7 +20,6 @@ import android.view.View
 import android.widget.TextView
 import androidx.appcompat.app.AlertDialog
 import androidx.core.app.ActivityCompat
-import androidx.lifecycle.Observer
 import com.google.android.gms.common.ConnectionResult
 import com.google.android.gms.common.api.GoogleApiClient
 import com.google.android.gms.common.api.ResolvableApiException
@@ -574,15 +573,15 @@ class TrackerActivity : AppCompatActivityWithActionBar(), android.location.Locat
     }
 
     override fun onStatusChanged(provider: String?, status: Int, extras: Bundle?) {
-        Timber.d("Location Service Status changes ${status}")
+        Timber.d("Location Service Status changes $status")
     }
 
     override fun onProviderEnabled(provider: String?) {
-        Timber.d("Location Service Provider ${provider} enabled")
+        Timber.d("Location Service Provider $provider enabled")
     }
 
     override fun onProviderDisabled(provider: String?) {
-        Timber.d("Location Service Provider ${provider} disabled")
+        Timber.d("Location Service Provider $provider disabled")
     }
 
     @SuppressLint("MissingPermission")
@@ -597,7 +596,7 @@ class TrackerActivity : AppCompatActivityWithActionBar(), android.location.Locat
     }
 
     override fun onConnectionSuspended(status: Int) {
-        Timber.d("Google Api Client suspended ${status}")
+        Timber.d("Google Api Client suspended $status")
     }
 
     override fun onConnectionFailed(connectionResult: ConnectionResult) {

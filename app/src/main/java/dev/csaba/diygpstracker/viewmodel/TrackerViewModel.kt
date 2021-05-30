@@ -98,7 +98,7 @@ class TrackerViewModel(firestore: FirebaseFirestore, assetId: String) : ViewMode
         val geoFenceType = if (native) "Native" else "Manual"
         val dateTimeString = LocalDateTime.now()
         val body = "Asset exited $geoFenceType at $dateTimeString " +
-                "(${lockLat}, ${lockLon} radius ${lockRadius}m)"
+                "($lockLat, $lockLon radius $lockRadius m)"
         repository.sendNotification(
             Notification("${System.currentTimeMillis()}", title, body)
         )
