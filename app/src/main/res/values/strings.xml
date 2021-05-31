@@ -43,7 +43,7 @@
     <string name="geofence_too_many_geofences">Your app has registered too many geofences</string>
     <string name="geofence_too_many_pending_intents">You have provided too many PendingIntents to the addGeofences() call</string>
     <string name="unknown_geofence_error">Unknown error: the Geofence service is not available now</string>
-    <string name="location_required_error">Location services must be enabled for this game.</string>
+    <string name="location_required_error">Location services must be enabled, because the essence of this app is to track your protected assets.</string>
 
     <!-- Geofence Status Strings -->
     <string name="geofence_added">Geofence added.</string>
@@ -60,6 +60,6 @@
     <string name="resolution_settings_error">Error getting location settings resolution: </string>
 
     <!-- Background Location permission Strings -->
-    <string name="bg_location_warning_title">Information</string>
+    <string name="bg_location_warning_title">Location Permission Information</string>
     <string name="bg_location_warning">This app collects location data to make GPS tracking of your assets possible even when the app is closed or not in use. Location information is *ONLY PERSISTED INTO YOUR OWN* managed Firestore.</string>
 </resources>
