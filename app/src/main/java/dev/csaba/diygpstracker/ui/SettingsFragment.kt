@@ -20,7 +20,7 @@ class SettingsFragment : PreferenceFragmentCompat() {
         setPreferencesFromResource(R.xml.preferences, rootKey)
     }
 
-    fun openBrowserWindow(url: String?, context: Context?) {
+    private fun openBrowserWindow(url: String?, context: Context?) {
         val uris = Uri.parse(url)
         val intent = Intent(Intent.ACTION_VIEW, uris)
         val bundle = Bundle()
