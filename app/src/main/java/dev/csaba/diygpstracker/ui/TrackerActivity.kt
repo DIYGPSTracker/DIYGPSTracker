@@ -4,10 +4,7 @@ import android.Manifest
 import android.annotation.SuppressLint
 import android.annotation.TargetApi
 import android.app.PendingIntent
-import android.content.BroadcastReceiver
-import android.content.Context
-import android.content.Intent
-import android.content.IntentSender
+import android.content.*
 import android.content.pm.PackageManager
 import android.location.Criteria
 import android.location.Location
@@ -18,6 +15,7 @@ import android.os.Bundle
 import android.provider.Settings
 import android.view.View
 import android.widget.TextView
+import androidx.annotation.StringRes
 import androidx.appcompat.app.AlertDialog
 import androidx.core.app.ActivityCompat
 import com.google.android.gms.common.ConnectionResult
@@ -205,26 +203,24 @@ class TrackerActivity : AppCompatActivityWithActionBar(), android.location.Locat
 
         locationSettingsResponseTask.addOnFailureListener { exception ->
             if (exception is ResolvableApiException && resolve) {
-                // Location settings are not satisfied, but this can be fixed
-                // by showing the user a dialog.
-                try {
-                    // Show the dialog by calling startResolutionForResult(),
-                    // and check the result in onActivityResult().
-                    exception.startResolutionForResult(
-                        this@TrackerActivity,
-                        REQUEST_TURN_DEVICE_LOCATION_ON
-                    )
-                } catch (sendEx: IntentSender.SendIntentException) {
-                    Timber.e(sendEx, getString(R.string.resolution_settings_error))
+                showBgLocationWarning(R.string.location_required_error) { _, _ ->
+                    // Location settings are not satisfied, but this can be fixed
+                    // by showing the user a dialog.
+                    try {
+                        // Show the dialog by calling startResolutionForResult(),
+                        // and check the result in onActivityResult().
+                        exception.startResolutionForResult(
+                            this@TrackerActivity,
+                            REQUEST_TURN_DEVICE_LOCATION_ON
+                        )
+                    } catch (sendEx: IntentSender.SendIntentException) {
+                        Timber.e(sendEx, getString(R.string.resolution_settings_error))
+                    }
                 }
             } else {
-                Snackbar.make(
-                    window.decorView.rootView,
-                    R.string.location_required_error,
-                    Snackbar.LENGTH_INDEFINITE
-                ).setAction(R.string.acknowledge) {
+                showBgLocationWarning(R.string.location_required_error) { _, _ ->
                     checkLocationIsOnAndStartGpsTracking()
-                }.show()
+                }
             }
         }
         locationSettingsResponseTask.addOnCompleteListener {
@@ -234,11 +230,11 @@ class TrackerActivity : AppCompatActivityWithActionBar(), android.location.Locat
         }
     }
 
-    private fun showBgLocationWarning() {
+    private fun showBgLocationWarning(@StringRes resourceId: Int, listener: DialogInterface.OnClickListener) {
         val builder = AlertDialog.Builder(this)
-        val arWarning = resources.getString(R.string.bg_location_warning)
+        val bgLocationWarning = resources.getString(resourceId)
         val title = resources.getString(R.string.bg_location_warning_title)
-        builder.setMessage(arWarning).setTitle(title).setPositiveButton("OK", null)
+        builder.setMessage(bgLocationWarning).setTitle(title).setPositiveButton("OK", listener)
         val dialog = builder.create()
         dialog.show()
     }
@@ -270,24 +266,25 @@ class TrackerActivity : AppCompatActivityWithActionBar(), android.location.Locat
      */
     @TargetApi(29)
     private fun requestForegroundAndBackgroundLocationPermissions() {
-        var permissionsArray = arrayOf(Manifest.permission.ACCESS_FINE_LOCATION)
+        showBgLocationWarning(R.string.bg_location_warning) { _, _ ->
+            var permissionsArray = arrayOf(Manifest.permission.ACCESS_FINE_LOCATION)
 
-        val resultCode = when {
-            runningQOrLater -> {
-                showBgLocationWarning()
-                // this provides the result[BACKGROUND_LOCATION_PERMISSION_INDEX]
-                permissionsArray += Manifest.permission.ACCESS_BACKGROUND_LOCATION
-                REQUEST_FOREGROUND_AND_BACKGROUND_PERMISSION_RESULT_CODE
+            val resultCode = when {
+                runningQOrLater -> {
+                    // this provides the result[BACKGROUND_LOCATION_PERMISSION_INDEX]
+                    permissionsArray += Manifest.permission.ACCESS_BACKGROUND_LOCATION
+                    REQUEST_FOREGROUND_AND_BACKGROUND_PERMISSION_RESULT_CODE
+                }
+                else -> REQUEST_FOREGROUND_ONLY_PERMISSIONS_REQUEST_CODE
             }
-            else -> REQUEST_FOREGROUND_ONLY_PERMISSIONS_REQUEST_CODE
-        }
 
-        Timber.d("Request foreground only location permission")
-        ActivityCompat.requestPermissions(
-            this@TrackerActivity,
-            permissionsArray,
-            resultCode
-        )
+            Timber.d("Request foreground only location permission")
+            ActivityCompat.requestPermissions(
+                this@TrackerActivity,
+                permissionsArray,
+                resultCode
+            )
+        }
     }
 
     // Checks if users have given their location and sets location enabled if so.
