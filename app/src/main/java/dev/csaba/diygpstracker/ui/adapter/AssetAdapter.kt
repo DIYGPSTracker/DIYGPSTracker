@@ -13,6 +13,8 @@ import com.google.android.material.button.MaterialButton
 import dev.csaba.diygpstracker.R
 import dev.csaba.diygpstracker.data.Asset
 import dev.csaba.diygpstracker.data.remote.mapPeriodIntervalToProgress
+import kotlinx.android.extensions.LayoutContainer
+import kotlinx.android.synthetic.main.recycler_item.*
 
 
 class AssetAdapter(private val assetInputListener: OnAssetInputListener?) : RecyclerView.Adapter<AssetViewHolder>() {
@@ -78,7 +80,7 @@ class AssetAdapter(private val assetInputListener: OnAssetInputListener?) : Recy
     }
 }
 
-class AssetViewHolder(val containerView: View): RecyclerView.ViewHolder(containerView)
+class AssetViewHolder(override val containerView: View): RecyclerView.ViewHolder(containerView), LayoutContainer
 
 interface OnAssetInputListener {
     fun onTrackClick(assetId: String)
