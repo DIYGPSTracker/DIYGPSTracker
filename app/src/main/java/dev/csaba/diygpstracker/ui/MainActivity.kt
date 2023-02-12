@@ -25,6 +25,7 @@ import dev.csaba.diygpstracker.data.setAssetId
 import dev.csaba.diygpstracker.ui.adapter.AssetAdapter
 import dev.csaba.diygpstracker.ui.adapter.OnAssetInputListener
 import dev.csaba.diygpstracker.viewmodel.MainViewModel
+import kotlinx.android.synthetic.main.activity_main.*
 import timber.log.Timber
 
 
@@ -48,10 +49,8 @@ class MainActivity : AppCompatActivityWithActionBar(), OnAssetInputListener {
             onTrackClick(assetId)
         }
 
-        val layoutManager = LinearLayoutManager(this, RecyclerView.VERTICAL, false)
-        val recyclerView = findViewById<RecyclerView>(R.id.recycler)
-        recyclerView.layoutManager = layoutManager
-        recyclerView.adapter = assetAdapter
+        recycler.layoutManager = LinearLayoutManager(this, RecyclerView.VERTICAL, false)
+        recycler.adapter = assetAdapter
 
         val appSingleton = application as ApplicationSingleton
         val projectConfiguration = this.getSecondaryFirebaseConfiguration()
