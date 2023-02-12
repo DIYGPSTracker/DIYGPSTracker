@@ -24,8 +24,8 @@ android {
         applicationId "dev.csaba.diygpstracker"
         minSdkVersion versions.minSdk
         targetSdkVersion versions.targetSdk
-        versionCode 7
-        versionName "1.7"
+        versionCode 8
+        versionName "1.8"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
     buildTypes {
