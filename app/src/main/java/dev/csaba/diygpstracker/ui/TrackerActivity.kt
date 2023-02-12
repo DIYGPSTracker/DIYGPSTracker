@@ -58,9 +58,6 @@ class TrackerActivity : AppCompatActivityWithActionBar(), android.location.Locat
     private lateinit var googleApiClient: GoogleApiClient
     @Volatile private var gotFirstObserve = false
 
-    private val runningQOrLater =
-        android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.Q
-
     /*
      * Triggered by the Geofence. We'll need to crank up the refresh interval and send notification
      */
@@ -135,7 +132,7 @@ class TrackerActivity : AppCompatActivityWithActionBar(), android.location.Locat
         val assetId = intent.getStringExtra("assetId")
         if (assetId != null && appSingleton.firestore != null) {
             viewModel = TrackerViewModel(appSingleton.firestore!!, assetId)
-            viewModel.asset.observe(this, {
+            viewModel.asset.observe(this) {
                 if (!gotFirstObserve) {
                     gotFirstObserve = true
                     if (BuildConfig.DEBUG && assetId != it.id) {
@@ -165,7 +162,7 @@ class TrackerActivity : AppCompatActivityWithActionBar(), android.location.Locat
                         addNativeGeoFence(it.lockLat, it.lockLon)
                     }
                 }
-            })
+            }
         }
     }
 
@@ -392,14 +389,14 @@ class TrackerActivity : AppCompatActivityWithActionBar(), android.location.Locat
     }
 
     /**
-     * Removes geofences. This method should be called after the user has granted the location
+     * Removes geo fences. This method should be called after the user has granted the location
      * permission.
      */
     private fun removeGeoFences(reinstateAfter: Boolean = false) {
         if (!isForegroundLocationPermissionApproved()) {
             return
         }
-        geoFencingClient.removeGeofences(geoFencePendingIntent)?.run {
+        geoFencingClient.removeGeofences(geoFencePendingIntent).run {
             addOnSuccessListener {
                 viewModel.geoFenceIndex = 0
                 // GeoFences removed
@@ -411,7 +408,7 @@ class TrackerActivity : AppCompatActivityWithActionBar(), android.location.Locat
                 ).show()
             }
             addOnFailureListener {
-                // Failed to remove geofences
+                // Failed to remove geo fences
                 Timber.d(getString(R.string.geofences_not_removed))
             }
         }
@@ -420,7 +417,7 @@ class TrackerActivity : AppCompatActivityWithActionBar(), android.location.Locat
     /*
      * Adds a Geofence for the current clue if needed, and removes any existing Geofence. This
      * method should be called after the user has granted the location permission.  If there are
-     * no more geofences, we remove the geofence and let the viewmodel know that the ending hint
+     * no more geo fences, we remove the geofence and let the viewmodel know that the ending hint
      * is now "active."
      */
     @SuppressLint("MissingPermission")
@@ -452,16 +449,16 @@ class TrackerActivity : AppCompatActivityWithActionBar(), android.location.Locat
             // GEOFENCE_TRANSITION_EXIT notification when the geofence is added and if the device
             // is already outside that geofence.
             .setInitialTrigger(GeofencingRequest.INITIAL_TRIGGER_EXIT)
-            // Add the geofences to be monitored by geofencing service.
+            // Add the geo fences to be monitored by geofencing service.
             .addGeofence(geofence)
             .build()
 
-        // First, remove any existing geofences that use our pending intent
-        geoFencingClient.removeGeofences(geoFencePendingIntent)?.run {
+        // First, remove any existing geo fences that use our pending intent
+        geoFencingClient.removeGeofences(geoFencePendingIntent).run {
             // Regardless of success/failure of the removal, add the new geofence
             addOnCompleteListener {
                 // Add the new geofence request with the new geofence
-                geoFencingClient.addGeofences(geofencingRequest, geoFencePendingIntent)?.run {
+                geoFencingClient.addGeofences(geofencingRequest, geoFencePendingIntent).run {
                     addOnSuccessListener {
                         // Geofence added.
                         Snackbar.make(
