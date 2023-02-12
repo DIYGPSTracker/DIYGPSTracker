@@ -2,7 +2,6 @@ package dev.csaba.diygpstracker.ui
 
 import android.content.Intent
 import android.os.Bundle
-import androidx.appcompat.app.AlertDialog
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.gms.auth.api.signin.GoogleSignIn
@@ -26,7 +25,6 @@ import dev.csaba.diygpstracker.data.setAssetId
 import dev.csaba.diygpstracker.ui.adapter.AssetAdapter
 import dev.csaba.diygpstracker.ui.adapter.OnAssetInputListener
 import dev.csaba.diygpstracker.viewmodel.MainViewModel
-import kotlinx.android.synthetic.main.activity_main.*
 import timber.log.Timber
 
 
@@ -50,8 +48,10 @@ class MainActivity : AppCompatActivityWithActionBar(), OnAssetInputListener {
             onTrackClick(assetId)
         }
 
-        recycler.layoutManager = LinearLayoutManager(this, RecyclerView.VERTICAL, false)
-        recycler.adapter = assetAdapter
+        val layoutManager = LinearLayoutManager(this, RecyclerView.VERTICAL, false)
+        val recyclerView = findViewById<RecyclerView>(R.id.recycler)
+        recyclerView.layoutManager = layoutManager
+        recyclerView.adapter = assetAdapter
 
         val appSingleton = application as ApplicationSingleton
         val projectConfiguration = this.getSecondaryFirebaseConfiguration()
@@ -135,6 +135,7 @@ class MainActivity : AppCompatActivityWithActionBar(), OnAssetInputListener {
         }
     }
 
+    @Deprecated("Deprecated in Java")
     public override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
 
@@ -179,9 +180,9 @@ class MainActivity : AppCompatActivityWithActionBar(), OnAssetInputListener {
     private fun populateViewModel(firestore: FirebaseFirestore) {
         viewModel = MainViewModel(firestore)
 
-        viewModel.assetList.observe(this, {
+        viewModel.assetList.observe(this) {
             assetAdapter.setItems(it)
-        })
+        }
     }
 
     override fun onTrackClick(assetId: String) {

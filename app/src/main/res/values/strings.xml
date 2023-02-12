@@ -16,16 +16,16 @@
     <string name="email_help">(optional) Email in case of Email+password auth</string>
     <string name="code_title">Password</string>
     <string name="code_help">(optional) Password in case of Email+password auth</string>
-    <string name="settings_help_key">settings_help</string>
+    <string translatable="false" name="settings_help_key">settings_help</string>
     <string name="settings_help">Create your own Firestore project to store your own data. For detailed explanation see <a href="https://diygpstracker.github.io/" target="_blank">DIY GPS Tracker</a></string>
     <string name="settings_button_title">Settings</string>
     <string name="privacy_button_title">Privacy Policy</string>
     <string name="help_button_title">Help</string>
-    <string name="connect_key">connect_button</string>
+    <string translatable="false" name="connect_key">connect_button</string>
     <string name="connect">&#xbb;Connect&#xab;</string>
     <string name="connect_help">Click connect to continue</string>
-    <string name="home_page_url">https://diygpstracker.github.io/</string>
-    <string name="privacy_policy_url">https://diygpstracker.github.io/privacy/</string>
+    <string translatable="false" name="home_page_url">https://diygpstracker.github.io/</string>
+    <string translatable="false" name="privacy_policy_url">https://diygpstracker.github.io/privacy/</string>
     <string name="authentication_failed">Authentication failed.</string>
     <string name="unconfigured_firestore">Firestore not configured. Please specify Project ID, Application ID, and API Key then connect.</string>
     <string name="asset_button_title">Asset List</string>

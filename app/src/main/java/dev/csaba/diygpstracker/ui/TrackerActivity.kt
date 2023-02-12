@@ -86,6 +86,10 @@ class TrackerActivity : AppCompatActivityWithActionBar(), android.location.Locat
         override fun onReceive(context: Context, intent: Intent) {
             if (intent.action == ACTION_GEO_FENCE_EVENT) {
                 val geoFencingEvent = GeofencingEvent.fromIntent(intent)
+                if (geoFencingEvent == null) {
+                    Timber.e("Cannot instantiate GeofencingEvent from Intent")
+                    return
+                }
 
                 if (geoFencingEvent.hasError()) {
                     val errorMessage = errorMessage(context, geoFencingEvent.errorCode)
@@ -97,8 +101,8 @@ class TrackerActivity : AppCompatActivityWithActionBar(), android.location.Locat
                     Timber.w(context.getString(R.string.geofence_exited))
 
                     val fenceId = when {
-                        geoFencingEvent.triggeringGeofences.isNotEmpty() ->
-                            geoFencingEvent.triggeringGeofences[0].requestId
+                        geoFencingEvent.triggeringGeofences?.isNotEmpty() ?: false ->
+                            geoFencingEvent.triggeringGeofences!![0].requestId
                         else -> {
                             Timber.e("No Geofence Trigger Found! Abort mission!")
                             return
@@ -178,6 +182,7 @@ class TrackerActivity : AppCompatActivityWithActionBar(), android.location.Locat
      *  checkLocationIsOnAndStartGpsTracking again to make sure it's actually on, but
      *  we don't resolve the check to keep the user from seeing an endless loop.
      */
+    @Deprecated("Deprecated in Java")
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
         if (requestCode == REQUEST_TURN_DEVICE_LOCATION_ON) {
@@ -532,52 +537,51 @@ class TrackerActivity : AppCompatActivityWithActionBar(), android.location.Locat
         // TODO: and reSchedule will be applied if needed (?)
     }
 
-    override fun onLocationChanged(location: Location?) {
-        if (location != null) {
-            val batteryLevel = getBatteryLevel()
-            viewModel.addReport(location.latitude, location.longitude, location.speed, batteryLevel)
-            val latTextView = findViewById<View>(R.id.latValue) as TextView
-            latTextView.text = location.latitude.toString()
-            val lonTextView = findViewById<View>(R.id.lonValue) as TextView
-            lonTextView.text = location.longitude.toString()
-            val speedTextView = findViewById<View>(R.id.speedValue) as TextView
-            speedTextView.text = location.speed.toString()
-            val battTextView = findViewById<View>(R.id.battValue) as TextView
-            battTextView.text = batteryLevel.toString()
-            val timeStampTextView = findViewById<View>(R.id.timeStamp) as TextView
-            timeStampTextView.text = Date().toString()
+    override fun onLocationChanged(location: Location) {
+        val batteryLevel = getBatteryLevel()
+        viewModel.addReport(location.latitude, location.longitude, location.speed, batteryLevel)
+        val latTextView = findViewById<View>(R.id.latValue) as TextView
+        latTextView.text = location.latitude.toString()
+        val lonTextView = findViewById<View>(R.id.lonValue) as TextView
+        lonTextView.text = location.longitude.toString()
+        val speedTextView = findViewById<View>(R.id.speedValue) as TextView
+        speedTextView.text = location.speed.toString()
+        val battTextView = findViewById<View>(R.id.battValue) as TextView
+        battTextView.text = batteryLevel.toString()
+        val timeStampTextView = findViewById<View>(R.id.timeStamp) as TextView
+        timeStampTextView.text = Date().toString()
 
-            // Asset is being locked, waiting for the location of the lock
-            if (viewModel.geoFenceLatch) {
-                viewModel.setAssetLockLocation(location.latitude, location.longitude)
-                addNativeGeoFence(location.latitude, location.longitude)
-                viewModel.geoFenceLatch = false
-            }
-            // Manual geo fence checking
-            if (viewModel.lastLock && !viewModel.lockManualAlert &&
-                abs(viewModel.lockLat) > 1e-6 && abs(viewModel.lockLon) > 1e-6)
-            {
-                val gpsDistance = haversineGPSDistance(
-                    viewModel.lockLat, viewModel.lockLon,
-                    location.latitude, location.longitude
-                )
-                // Asset exited the geo-fence
-                if (gpsDistance >= viewModel.lockRadius) {
-                    geoFenceExitedHandler(false)
-                }
+        // Asset is being locked, waiting for the location of the lock
+        if (viewModel.geoFenceLatch) {
+            viewModel.setAssetLockLocation(location.latitude, location.longitude)
+            addNativeGeoFence(location.latitude, location.longitude)
+            viewModel.geoFenceLatch = false
+        }
+        // Manual geo fence checking
+        if (viewModel.lastLock && !viewModel.lockManualAlert &&
+            abs(viewModel.lockLat) > 1e-6 && abs(viewModel.lockLon) > 1e-6)
+        {
+            val gpsDistance = haversineGPSDistance(
+                viewModel.lockLat, viewModel.lockLon,
+                location.latitude, location.longitude
+            )
+            // Asset exited the geo-fence
+            if (gpsDistance >= viewModel.lockRadius) {
+                geoFenceExitedHandler(false)
             }
         }
     }
 
-    override fun onStatusChanged(provider: String?, status: Int, extras: Bundle?) {
+    @Deprecated("Deprecated in Java")
+    override fun onStatusChanged(provider: String, status: Int, extras: Bundle) {
         Timber.d("Location Service Status changes $status")
     }
 
-    override fun onProviderEnabled(provider: String?) {
+    override fun onProviderEnabled(provider: String) {
         Timber.d("Location Service Provider $provider enabled")
     }
 
-    override fun onProviderDisabled(provider: String?) {
+    override fun onProviderDisabled(provider: String) {
         Timber.d("Location Service Provider $provider disabled")
     }
 
