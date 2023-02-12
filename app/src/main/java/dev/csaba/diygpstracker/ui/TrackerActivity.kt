@@ -42,11 +42,9 @@ class TrackerActivity : AppCompatActivityWithActionBar(), android.location.Locat
         private const val EQATORIAL_EARTH_RADIUS = 6378137.0  // in m and not km
         private const val D2R = Math.PI / 180.0
 
-        private const val REQUEST_FOREGROUND_AND_BACKGROUND_PERMISSION_RESULT_CODE = 33
         private const val REQUEST_FOREGROUND_ONLY_PERMISSIONS_REQUEST_CODE = 34
         private const val REQUEST_TURN_DEVICE_LOCATION_ON = 29
         private const val LOCATION_PERMISSION_INDEX = 0
-        private const val BACKGROUND_LOCATION_PERMISSION_INDEX = 1
 
         internal const val ACTION_GEO_FENCE_EVENT = "TrackerActivity.action.ACTION_GEOFENCE_EVENT"
         internal const val GEO_FENCE_SINGLETON_ID = "asset_on_demand_geofence"
@@ -238,7 +236,7 @@ class TrackerActivity : AppCompatActivityWithActionBar(), android.location.Locat
     private fun showBgLocationWarning(@StringRes resourceId: Int, listener: DialogInterface.OnClickListener) {
         val builder = AlertDialog.Builder(this)
         val bgLocationWarning = resources.getString(resourceId)
-        val title = resources.getString(R.string.bg_location_warning_title)
+        val title = resources.getString(R.string.location_warning_title)
         builder.setMessage(bgLocationWarning).setTitle(title).setPositiveButton("OK", listener)
         val dialog = builder.create()
         dialog.show()
@@ -249,55 +247,33 @@ class TrackerActivity : AppCompatActivityWithActionBar(), android.location.Locat
      *  Android versions.
      */
     @TargetApi(29)
-    private fun isForegroundAndBackgroundLocationPermissionApproved(): Boolean {
-        val foregroundLocationApproved = (
-            ActivityCompat.checkSelfPermission(
+    private fun isForegroundLocationPermissionApproved(): Boolean {
+        return ActivityCompat.checkSelfPermission(
                 this, Manifest.permission.ACCESS_FINE_LOCATION
             ) == PackageManager.PERMISSION_GRANTED
-        )
-
-        // No need to check more if it's Android P or less or false
-        if (!runningQOrLater || !foregroundLocationApproved)
-            return foregroundLocationApproved
-
-        // If Android Q and we have Fine Location check the BG permission too
-        return ActivityCompat.checkSelfPermission(
-            this, Manifest.permission.ACCESS_BACKGROUND_LOCATION
-        ) == PackageManager.PERMISSION_GRANTED
     }
 
     /*
-     *  Requests ACCESS_FINE_LOCATION and (on Android 10+ (Q) ACCESS_BACKGROUND_LOCATION).
+     *  Requests ACCESS_FINE_LOCATION.
      */
     @TargetApi(29)
-    private fun requestForegroundAndBackgroundLocationPermissions() {
-        showBgLocationWarning(R.string.bg_location_warning) { _, _ ->
-            var permissionsArray = arrayOf(Manifest.permission.ACCESS_FINE_LOCATION)
-
-            val resultCode = when {
-                runningQOrLater -> {
-                    // this provides the result[BACKGROUND_LOCATION_PERMISSION_INDEX]
-                    permissionsArray += Manifest.permission.ACCESS_BACKGROUND_LOCATION
-                    REQUEST_FOREGROUND_AND_BACKGROUND_PERMISSION_RESULT_CODE
-                }
-                else -> REQUEST_FOREGROUND_ONLY_PERMISSIONS_REQUEST_CODE
-            }
-
+    private fun requestForegroundLocationPermissions() {
+        showBgLocationWarning(R.string.location_warning) { _, _ ->
             Timber.d("Request foreground only location permission")
             ActivityCompat.requestPermissions(
                 this@TrackerActivity,
-                permissionsArray,
-                resultCode
+                arrayOf(Manifest.permission.ACCESS_FINE_LOCATION),
+                REQUEST_FOREGROUND_ONLY_PERMISSIONS_REQUEST_CODE
             )
         }
     }
 
     // Checks if users have given their location and sets location enabled if so.
     private fun obtainLocationPermissionAndStartTracking() {
-        if (isForegroundAndBackgroundLocationPermissionApproved()) {
+        if (isForegroundLocationPermissionApproved()) {
             checkLocationIsOnAndStartGpsTracking()
         } else {
-            requestForegroundAndBackgroundLocationPermissions()
+            requestForegroundLocationPermissions()
         }
     }
 
@@ -312,10 +288,7 @@ class TrackerActivity : AppCompatActivityWithActionBar(), android.location.Locat
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
         if (
             grantResults.isEmpty() ||
-            grantResults[LOCATION_PERMISSION_INDEX] == PackageManager.PERMISSION_DENIED ||
-            (requestCode == REQUEST_FOREGROUND_AND_BACKGROUND_PERMISSION_RESULT_CODE &&
-                    grantResults[BACKGROUND_LOCATION_PERMISSION_INDEX] ==
-                    PackageManager.PERMISSION_DENIED))
+            grantResults[LOCATION_PERMISSION_INDEX] == PackageManager.PERMISSION_DENIED)
         {
             // Permission denied.
             Snackbar.make(
@@ -423,7 +396,7 @@ class TrackerActivity : AppCompatActivityWithActionBar(), android.location.Locat
      * permission.
      */
     private fun removeGeoFences(reinstateAfter: Boolean = false) {
-        if (!isForegroundAndBackgroundLocationPermissionApproved()) {
+        if (!isForegroundLocationPermissionApproved()) {
             return
         }
         geoFencingClient.removeGeofences(geoFencePendingIntent)?.run {

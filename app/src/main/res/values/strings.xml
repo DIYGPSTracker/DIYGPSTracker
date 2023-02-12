@@ -53,13 +53,11 @@
     <string name="geofence_not_added">Problem in adding geofence.</string>
     <string name="insufficient_permissions">Insufficient permissions.</string>
     <string name="geofence_error">There was an error in finding your treasure</string>
-    <string name="permission_denied_explanation">
-        You need to grant location permission in order to track and geofence.
-    </string>
+    <string name="permission_denied_explanation">You need to grant location permission in order to track and geofence.</string>
     <string name="settings">Settings</string>
     <string name="resolution_settings_error">Error getting location settings resolution: </string>
 
-    <!-- Background Location permission Strings -->
-    <string name="bg_location_warning_title">Location Permission Information</string>
-    <string name="bg_location_warning">This app collects location data to make GPS tracking of your assets possible even when the app is closed or not in use. Location information is *ONLY PERSISTED INTO YOUR OWN* managed Firestore.</string>
+    <!-- Location permission Strings -->
+    <string name="location_warning_title">Location Permission Information</string>
+    <string name="location_warning">This app collects location data to make GPS tracking of your assets. Location information is only persisted *YOUR OWN* managed Firestore!</string>
 </resources>

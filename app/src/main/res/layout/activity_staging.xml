@@ -16,7 +16,7 @@
         android:textColor="@color/design_default_color_error"
         android:textStyle="italic"
         app:layout_constraintTop_toTopOf="parent"
-        android:text="@string/bg_location_warning" />
+        android:text="@string/location_warning" />
 
     <com.google.android.material.textview.MaterialTextView
         android:id="@+id/settingsHelp"
